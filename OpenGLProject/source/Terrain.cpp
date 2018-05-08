@@ -3,11 +3,68 @@
 #include <fstream>
 #include <random>
 #include "PerlinNoise.h"
-#include "DiamondSquare.h"
 #include <fstream>
+
+float frand(float min, float max)
+{
+	float f = (float)rand() / RAND_MAX;
+	return min + f * (max - min);
+}
+
+Terrain::Terrain(unsigned int gridSizeX, unsigned int gridSizeY) : m_gridSizeX(gridSizeX), m_gridSizeY(gridSizeY)
+{
+	m_heights = Array2D<float>(m_gridSizeX, m_gridSizeY);
+}
 
 // generate terrain using perlin noise
 void Terrain::generatePerlin()
+{
+	for (int x = 0; x < m_gridSizeX; x++)
+	{
+		for (int y = 0; y < m_gridSizeY; y++)
+		{
+			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 20, 0.5f);
+
+			m_heights(x, y) = perlin * 8;
+		}
+	}
+
+	init();
+}
+
+// set heights using the diamond square algorithm
+void Terrain::generateDiamondSquare(int featureSize)
+{
+	// seed corners
+	m_heights(0, 0) = frand(0, 1);
+	m_heights(m_gridSizeX - 1, 0) = frand(0, 1);
+	m_heights(0, m_gridSizeY - 1) = frand(0, 1);
+	m_heights(m_gridSizeX - 1, m_gridSizeY - 1) = frand(0, 1);
+
+	int sampleSize = featureSize;
+	float scale = 1.0f;
+
+	while (sampleSize > 1)
+	{
+		diamondSquare(sampleSize, scale);
+
+		sampleSize /= 2;
+		scale /= 2.0f;
+	}
+
+	init();
+}
+
+// draw the Terrain using the supplied Shader
+void Terrain::Draw(Shader shader)
+{
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+// send data to the GPU
+void Terrain::init()
 {
 	// generate mesh
 	for (int x = 0, i = 0; x < m_gridSizeX; x++)
@@ -20,7 +77,7 @@ void Terrain::generatePerlin()
 			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 20, 0.5f);
 
 			// set vertex position
-			vert.Position = glm::vec3(x - m_gridSizeX / 2.0f, perlin, y - m_gridSizeY / 2.0f);
+			vert.Position = glm::vec3(x - m_gridSizeX / 2.0f, perlin * 8, y - m_gridSizeY / 2.0f);
 
 			// set texture coordinates (currently unused)
 			vert.TexCoords = glm::vec2((float)x / (float)m_gridSizeX, (float)y / (float)m_gridSizeY);
@@ -69,170 +126,6 @@ void Terrain::generatePerlin()
 		}
 	}
 
-	init();
-}
-
-// generate terrain using the diamond square method
-void Terrain::generateDiamondSquare()
-{
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
-		{
-			Vertex vert;
-
-			// position
-			vert.Position = glm::vec3(x, DiamondSquare::getInstance().sample(x, y), y);
-
-			// uvs
-			vert.TexCoords = glm::vec2(x / m_gridSizeX, y / m_gridSizeY);
-
-			vertices.push_back(vert);
-
-			// create triangles
-			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
-			{
-				int i2 = i + 1;
-				int i3 = i + m_gridSizeX;
-				int i4 = i + m_gridSizeX + 1;
-
-				indices.push_back(i);
-				indices.push_back(i2);
-				indices.push_back(i3);
-
-				indices.push_back(i3);
-				indices.push_back(i2);
-				indices.push_back(i4);
-			}
-		}
-	}
-
-	// calculate vertex normals
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
-		{
-			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
-			{
-				int i2 = i + 1;
-				int i3 = i + m_gridSizeX;
-				int i4 = i + m_gridSizeX + 1;
-
-				glm::vec3 posA = vertices[i].Position;
-				glm::vec3 posB = vertices[i2].Position;
-				glm::vec3 posC = vertices[i3].Position;
-				glm::vec3 posD = vertices[i4].Position;
-
-				glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
-				glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
-
-				vertices[i].Normal = (n1 + n2) * 0.5f;
-			}
-		}
-	}
-
-	init();
-}
-
-// load terrain from file
-void Terrain::loadFile(const std::string& filename)
-{
-	// attempt to load file
-	std::ifstream file(filename, std::ios::_Nocreate | std::ios::binary);
-
-	if (!file.is_open())
-	{
-		std::cout << "Failed to open " << filename << std::endl;
-		return;
-	}
-
-	// set grid size
-	m_gridSizeX = m_gridSizeY = 256;
-
-	// create 2d heights vector
-	Array2D<uint16_t> heights(m_gridSizeX, m_gridSizeY);
-
-	// read heights into vector
-	for (int y = 0; y < m_gridSizeY; y++)
-	{
-		for (int x = 0; x < m_gridSizeX; x++)
-		{
-			// read current height
-			file.read(reinterpret_cast<char*>(&heights(x, y)), sizeof(uint16_t));
-		}
-	}
-
-	// close file
-	file.close();
-
-	// setup mesh
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
-		{
-			// current vertex
-			Vertex vert;
-
-			vert.Position = glm::vec3(x, heights(x, y), y);
-
-			vertices.push_back(vert);
-
-			// create triangles
-			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
-			{
-				int i2 = i + 1;
-				int i3 = i + m_gridSizeX;
-				int i4 = i + m_gridSizeX + 1;
-
-				indices.push_back(i);
-				indices.push_back(i2);
-				indices.push_back(i3);
-
-				indices.push_back(i3);
-				indices.push_back(i2);
-				indices.push_back(i4);
-			}
-		}
-	}
-
-	// calculate vertex normals
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
-		{
-			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
-			{
-				int i2 = i + 1;
-				int i3 = i + m_gridSizeX;
-				int i4 = i + m_gridSizeX + 1;
-
-				glm::vec3 posA = vertices[i].Position;
-				glm::vec3 posB = vertices[i2].Position;
-				glm::vec3 posC = vertices[i3].Position;
-				glm::vec3 posD = vertices[i4].Position;
-
-				glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
-				glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
-
-				vertices[i].Normal = (n1 + n2) * 0.5f;
-			}
-		}
-	}
-
-	init();
-}
-
-// draw the Terrain using the supplied Shader
-void Terrain::Draw(Shader shader)
-{
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
-
-// send data to the GPU
-void Terrain::init()
-{
 	// create buffers/arrays
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -267,4 +160,61 @@ void Terrain::init()
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
 	glBindVertexArray(0);
+}
+
+// diamond square algorithm
+void Terrain::diamondSquare(int stepSize, float scale)
+{
+	int halfStep = stepSize / 2;
+
+	for (int y = halfStep; y < m_gridSizeY + halfStep; y += stepSize)
+	{
+		for (int x = halfStep; x < m_gridSizeX + halfStep; x += stepSize)
+		{
+			sampleSquare(x, y, stepSize, frand(-scale, scale));
+		}
+	}
+
+	for (int y = 0; y < m_gridSizeY; y += stepSize)
+	{
+		for (int x = 0; x < m_gridSizeX; x += stepSize)
+		{
+			sampleDiamond(x + halfStep, y, stepSize, frand(-scale, scale));
+			sampleDiamond(x, y + halfStep, stepSize, frand(-scale, scale));
+		}
+	}
+}
+
+void Terrain::sampleSquare(int x, int y, int size, float value)
+{
+	int hs = size / 2;
+
+	float a = sample(x - hs, y - hs);
+	float b = sample(x + hs, y - hs);
+	float c = sample(x - hs, y + hs);
+	float d = sample(x + hs, y + hs);
+
+	setSample(x, y, ((a + b + c + d) / 4.0f) + value);
+}
+
+void Terrain::sampleDiamond(int x, int y, int size, float value)
+{
+	int hs = size / 2;
+
+	float a = sample(x - hs, y);
+	float b = sample(x + hs, y);
+	float c = sample(x, y - hs);
+	float d = sample(x, y + hs);
+
+	setSample(x, y, ((a + b + c + d) / 4.0f) + value);
+}
+
+float Terrain::sample(int x, int y)
+{
+	return (m_heights(x & (m_gridSizeX - 1), y & (m_gridSizeY - 1)));
+}
+
+void Terrain::setSample(int x, int y, float value)
+{
+	m_heights(x & (m_gridSizeX - 1), y & (m_gridSizeY - 1)) = value;
 }

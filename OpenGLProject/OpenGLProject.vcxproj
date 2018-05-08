@@ -148,7 +148,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\DiamondSquare.cpp" />
     <ClCompile Include="source\glad.c" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\PerlinNoise.cpp" />
@@ -157,7 +156,6 @@
   <ItemGroup>
     <ClInclude Include="source\Array2D.h" />
     <ClInclude Include="source\Camera.h" />
-    <ClInclude Include="source\DiamondSquare.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\Model.h" />
     <ClInclude Include="source\PerlinNoise.h" />

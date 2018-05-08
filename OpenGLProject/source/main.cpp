@@ -23,11 +23,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 1680;
+const unsigned int SCR_HEIGHT = 1050;
 
 // camera
-Camera camera(glm::vec3(0.0f, 10.0f, 0.0f));
+Camera camera(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0, 1, 0), -45, -15);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -38,7 +38,7 @@ float lastFrame = 0.0f;
 
 int main()
 {
-	srand(16);
+	srand(time(NULL));
 
 	// glfw: initialize and configure
 	// ------------------------------
@@ -49,7 +49,7 @@ int main()
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", glfwGetPrimaryMonitor(), NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -82,10 +82,8 @@ int main()
 
 	// load models
 	// -----------
-	// Model ourModel((fs::current_path().string() + "\\resources\\objects\\buddha\\buddha.obj").c_str());
-	Terrain terrain(256, 256);
-	terrain.generateDiamondSquare();
-	//terrain.loadFile(fs::current_path().string() + "\\resources\\objects\\5000000000.hght");
+	Terrain terrain(2048, 2048);
+	terrain.generatePerlin();
 
 	// render loop
 	// -----------
@@ -130,7 +128,6 @@ int main()
 		glm::mat4 model;
 		// scale terrain
 		model = glm::scale(model, glm::vec3(1.0f / 16.0f, 1.0f, 1.0f / 16.0f));
-		//model = glm::scale(model, glm::vec3(1.0f / 16.0f, 1.0f / 32768.0f, 1.0f / 16.0f));
 		ourShader.setMat4("model", model);
 		terrain.Draw(ourShader);
 
@@ -152,6 +149,11 @@ void processInput(GLFWwindow *window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+		camera.run = true;
+	else
+		camera.run = false;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);

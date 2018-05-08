@@ -14,11 +14,10 @@ public:
 
 	unsigned int VAO;
 
-	Terrain(unsigned int gridSizeX = 1, unsigned int gridSizeY = 1) : m_gridSizeX(gridSizeX), m_gridSizeY(gridSizeY) {}
+	Terrain(unsigned int gridSizeX = 1, unsigned int gridSizeY = 1);
 
 	void generatePerlin();
-	void generateDiamondSquare();
-	void loadFile(const std::string& filename);
+	void generateDiamondSquare(int featureSize);
 
 	void Draw(Shader shader);
 
@@ -28,7 +27,17 @@ private:
 	unsigned int m_gridSizeX;
 	unsigned int m_gridSizeY;
 
+	Array2D<float> m_heights;
+
 	void init();
 
 	unsigned int VBO, EBO;
+
+	void diamondSquare(int stepSize, float scale);
+
+	void sampleSquare(int x, int y, int size, float value);
+	void sampleDiamond(int x, int y, int size, float value);
+
+	float sample(int x, int y);
+	void setSample(int x, int y, float sample);
 };
