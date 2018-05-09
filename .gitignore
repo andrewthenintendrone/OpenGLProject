@@ -8,6 +8,9 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.exe
+*.tlog
+*.idb
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -20,7 +23,6 @@
 x64/
 x86/
 bld/
-[Bb]in/
 [Oo]bj/
 [Ll]og/
 
@@ -297,3 +299,4 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+*.tlog
