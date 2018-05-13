@@ -18,6 +18,7 @@ public:
 
 	void generatePerlin();
 	void generateDiamondSquare(int featureSize);
+	void readRaw(const std::string& filename);
 
 	void Draw(Shader shader);
 
@@ -40,4 +41,7 @@ private:
 
 	float sample(int x, int y);
 	void setSample(int x, int y, float sample);
+
+	glm::vec3 getVertexNormal(int x, int y);
+	glm::vec3 getTriangleNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3);
 };

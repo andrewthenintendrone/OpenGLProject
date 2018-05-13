@@ -43,7 +43,10 @@ private:
 	Shader m_shader;
 
 	// Terrain(s)
-	Terrain m_terrain;
+	//Terrain m_terrain;
+
+	// Model(s)
+	Model m_model;
 
 	// per-frame time logic
 	// --------------------

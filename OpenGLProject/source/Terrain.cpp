@@ -36,7 +36,7 @@ void Terrain::generatePerlin()
 void Terrain::generateDiamondSquare(int featureSize)
 {
 	// seed corners
-	m_heights(0, 0) = frand(0, 1);
+	/*m_heights(0, 0) = frand(0, 1);
 	m_heights(m_gridSizeX - 1, 0) = frand(0, 1);
 	m_heights(0, m_gridSizeY - 1) = frand(0, 1);
 	m_heights(m_gridSizeX - 1, m_gridSizeY - 1) = frand(0, 1);
@@ -50,8 +50,47 @@ void Terrain::generateDiamondSquare(int featureSize)
 
 		sampleSize /= 2;
 		scale /= 2.0f;
+	}*/
+
+	for (int x = 0; x < m_gridSizeX; x++)
+	{
+		for (int y = 0; y < m_gridSizeY; y++)
+		{
+			m_heights(x, y) = (x * 2) + y;
+		}
 	}
 
+	init();
+}
+
+// read terrain from heightmap file
+void Terrain::readRaw(const std::string& filename)
+{
+	std::ifstream file;
+	file.open(filename, std::ios::_Nocreate | std::ios::binary);
+
+	if (!file.is_open())
+	{
+		std::cout << "Failed to open " << filename << std::endl;
+		return;
+	}
+
+	// read heights into buffer
+	for (int x = 0; x < m_gridSizeX; x++)
+	{
+		for (int y = 0; y < m_gridSizeY; y++)
+		{
+			uint16_t currentHeight;
+
+			file.read(reinterpret_cast<char*>(&currentHeight), sizeof(uint16_t));
+			m_heights(x, m_gridSizeY - 1 - y) = (float)currentHeight;
+		}
+	}
+
+	// close file
+	file.close();
+
+	// initialize mesh
 	init();
 }
 
@@ -73,11 +112,11 @@ void Terrain::init()
 		{
 			Vertex vert;
 
-			// sample perlin noise
-			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 20, 0.5f);
+			// sample heights
+			float currentHeight = m_heights(x, y);
 
 			// set vertex position
-			vert.Position = glm::vec3(x - m_gridSizeX / 2.0f, perlin * 8, y - m_gridSizeY / 2.0f);
+			vert.Position = glm::vec3(x - m_gridSizeX / 2.0f, currentHeight, y - m_gridSizeY / 2.0f);
 
 			// set texture coordinates (currently unused)
 			vert.TexCoords = glm::vec2((float)x / (float)m_gridSizeX, (float)y / (float)m_gridSizeY);
@@ -109,19 +148,7 @@ void Terrain::init()
 		{
 			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
 			{
-				int i2 = i + 1;
-				int i3 = i + m_gridSizeX;
-				int i4 = i + m_gridSizeX + 1;
-
-				glm::vec3 posA = vertices[i].Position;
-				glm::vec3 posB = vertices[i2].Position;
-				glm::vec3 posC = vertices[i3].Position;
-				glm::vec3 posD = vertices[i4].Position;
-
-				glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
-				glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
-
-				vertices[i].Normal = (n1 + n2) * 0.5f;
+				vertices[i].Normal = getVertexNormal(y, x);
 			}
 		}
 	}
@@ -217,4 +244,37 @@ float Terrain::sample(int x, int y)
 void Terrain::setSample(int x, int y, float value)
 {
 	m_heights(x & (m_gridSizeX - 1), y & (m_gridSizeY - 1)) = value;
+}
+
+// returns the normal of a vertex by averaging the normals of the surrounding faces
+glm::vec3 Terrain::getVertexNormal(int x, int y)
+{
+	int i = y * m_gridSizeX + x;;
+
+	int i2 = i + 1;
+	int i3 = i + m_gridSizeX;
+	int i4 = i + m_gridSizeX + 1;
+
+	glm::vec3 posA = vertices[i].Position;
+	glm::vec3 posB = vertices[i2].Position;
+	glm::vec3 posC = vertices[i3].Position;
+	glm::vec3 posD = vertices[i4].Position;
+
+	glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
+	glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
+
+	return (n1 + n2) * 0.5f;
+}
+
+// returns the normal direction of a triangle given 3 points
+glm::vec3 Terrain::getTriangleNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+{
+	// to find the normal of three points first take two of the edges
+	glm::vec3 edge1 = (p2 - p1);
+	glm::vec3 edge2 = (p3 - p1);
+
+	// then the cross product of these two edges will point perpendicular to the triangle
+	glm::vec3 direction = glm::cross(edge1, edge2);
+
+	return direction;
 }

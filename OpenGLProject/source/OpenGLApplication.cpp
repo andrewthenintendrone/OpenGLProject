@@ -56,12 +56,13 @@ void OpenGLApplication::setup()
 {
 	// build and compile shaders
 	// -------------------------
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\specular.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\specular.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\textures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\textures.fs").c_str());
 
 	// load models
 	// -----------
-	m_terrain = Terrain(256, 256);
-	m_terrain.generatePerlin();
+	//m_terrain = Terrain(513, 513);
+	//m_terrain.readRaw("C://Users//Andrew//Desktop//terrain.raw");
+	m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
 }
 
 void OpenGLApplication::run()
@@ -111,18 +112,18 @@ void OpenGLApplication::render()
 	m_shader.setFloat("material.ambient", 0.1f);
 	m_shader.setFloat("material.diffuse", 1.0f);
 	m_shader.setFloat("material.specular", 0.2f);
-	m_shader.setFloat("material.shininess", 16.0f);
+	m_shader.setFloat("material.shininess", 64.0f);
 
-	m_shader.setVec3("lightDirection", glm::vec3(-0.2f, -1.0f, -0.3f));
+	m_shader.setVec3("lightPos", glm::vec3(0.2f, 1.0f, 0.3f));
 
 	m_shader.setVec3("viewPos", m_camera.Position);
 
 	// render the loaded model
 	glm::mat4 model;
 	// scale terrain
-	model = glm::scale(model, glm::vec3(1.0f / 16.0f, 1.0f, 1.0f / 16.0f));
+	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 	m_shader.setMat4("model", model);
-	m_terrain.Draw(m_shader);
+	m_model.Draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------
