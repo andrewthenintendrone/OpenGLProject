@@ -107,21 +107,12 @@ void OpenGLApplication::render()
 	m_shader.setMat4("projection", projection);
 	m_shader.setMat4("view", view);
 
-	// set shader material
-	m_shader.setVec3("material.color", glm::vec3(0.5));
-	m_shader.setFloat("material.ambient", 0.1f);
-	m_shader.setFloat("material.diffuse", 1.0f);
-	m_shader.setFloat("material.specular", 0.2f);
-	m_shader.setFloat("material.shininess", 64.0f);
-
 	m_shader.setVec3("lightPos", glm::vec3(0.2f, 1.0f, 0.3f));
 
 	m_shader.setVec3("viewPos", m_camera.Position);
 
 	// render the loaded model
 	glm::mat4 model;
-	// scale terrain
-	model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 	m_shader.setMat4("model", model);
 	m_model.Draw(m_shader);
 
