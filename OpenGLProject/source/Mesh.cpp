@@ -1,5 +1,6 @@
 #include "Mesh.h"
 
+// constructor using list of vertices, indices, and textures
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures) :
 	vertices(vertices), indices(indices), textures(textures)
 {
@@ -11,6 +12,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture
 	setupMesh();
 }
 
+// render the mesh using the specified shader
 void Mesh::Draw(Shader shader)
 {
 	// how many of each type of texture do we have
@@ -52,6 +54,7 @@ void Mesh::Draw(Shader shader)
 	glActiveTexture(GL_TEXTURE0);
 }
 
+// initializes all the buffer objects / arrays
 void Mesh::setupMesh()
 {
 	// create buffers/arrays

@@ -55,13 +55,9 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	// -------------------------
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\textures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\textures.fs").c_str());
 
 	// load models
-	// -----------
-	//m_terrain = Terrain(513, 513);
-	//m_terrain.readRaw("C://Users//Andrew//Desktop//terrain.raw");
 	m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
 }
 

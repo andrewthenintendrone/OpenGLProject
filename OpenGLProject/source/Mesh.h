@@ -45,10 +45,8 @@ public:
 	// default constructor
 	Mesh() {}
 
-	// constructor using list of vertices, indices, and textures
 	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
 
-	// render the mesh using the specified shader
 	void Draw(Shader shader);
 
 protected:
@@ -56,8 +54,6 @@ protected:
 	unsigned int VBO; // vertex buffer object
 	unsigned int EBO; // element buffer object
 
-	
-	// initializes all the buffer objects/arrays
 	void setupMesh();
 };
 #endif

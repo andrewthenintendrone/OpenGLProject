@@ -45,17 +45,20 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 	return textureID;
 }
 
+// constructor, expects a filepath to a 3D model.
 Model::Model(const string& path, bool gamma) : gammaCorrection(gamma)
 {
 	loadModel(path);
 }
 
+// draws the model using the specified shader
 void Model::Draw(Shader shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw(shader);
 }
 
+// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 void Model::loadModel(const string& path)
 {
 	// read file using assimp
@@ -76,6 +79,7 @@ void Model::loadModel(const string& path)
 	processNode(scene->mRootNode, scene);
 }
 
+// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
 	// process each mesh located at the current node
@@ -93,6 +97,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 	}
 }
 
+// creates a Mesh from an aiMesh
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	// data to fill
@@ -173,6 +178,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	return Mesh(vertices, indices, textures);
 }
 
+// loads textures if they aren't already loaded
 vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
 {
 	vector<Texture> textures;
