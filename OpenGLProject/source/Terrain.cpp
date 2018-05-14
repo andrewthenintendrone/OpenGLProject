@@ -138,18 +138,12 @@ void Terrain::init()
 	{
 		for (int y = 0; y < m_gridSizeY; y++, i++)
 		{
-			vertices[i].Normal = getVertexNormal(x, y);
+			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
+			{
+				vertices[i].Normal = getVertexNormal(y, x);
+			}
 		}
 	}
-
-	// reflatten
-	//for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	//{
-	//	for (int y = 0; y < m_gridSizeY; y++, i++)
-	//	{
-	//		vertices[i].Position = glm::vec3(x, 0, y);
-	//	}
-	//}
 
 	// create buffers/arrays
 	glGenVertexArrays(1, &VAO);
@@ -247,79 +241,21 @@ void Terrain::setSample(int x, int y, float value)
 // returns the normal of a vertex by averaging the normals of the surrounding faces
 glm::vec3 Terrain::getVertexNormal(int x, int y)
 {
-	int i = y * m_gridSizeX + x;
+	int i = y * m_gridSizeX + x;;
 
-	if (x == 0)
-	{
-		if (y == 0)
-		{
-			glm::vec3 n1 = getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-			glm::vec3 n2 = getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	int i2 = i + 1;
+	int i3 = i + m_gridSizeX;
+	int i4 = i + m_gridSizeX + 1;
 
-			return (n1 + n2) / 2.0f;
-		}
-		else if (y == m_gridSizeY - 1)
-		{
-			return getTriangleNormal(vertices[i + 1].Position, vertices[i].Position, vertices[i - m_gridSizeX].Position);
-		}
-		else
-		{
-			glm::vec3 n1 = getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-			glm::vec3 n2 = getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-			glm::vec3 n3 = getTriangleNormal(vertices[i + 1].Position, vertices[i].Position, vertices[i - m_gridSizeX].Position);
+	glm::vec3 posA = vertices[i].Position;
+	glm::vec3 posB = vertices[i2].Position;
+	glm::vec3 posC = vertices[i3].Position;
+	glm::vec3 posD = vertices[i4].Position;
 
-			return (n1 + n2 + n3) / 3.0f;
-		}
-	}
-	else if (x == m_gridSizeX - 1)
-	{
-		if (y == 0)
-		{
-			return getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		}
-		else if (y == m_gridSizeY - 1)
-		{
-			glm::vec3 n1 = getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-			glm::vec3 n2 = getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
+	glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
 
-			return (n1 + n2) / 2.0f;
-		}
-		else
-		{
-			glm::vec3 n1 = getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-			glm::vec3 n2 = getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-			glm::vec3 n3 = getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-
-			return (n1 + n2 + n3) / 3.0f;
-		}
-	}
-	else if (y == 0)
-	{
-		glm::vec3 n1 = getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		glm::vec3 n2 = getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-		glm::vec3 n3 = getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-
-		return (n1 + n2 + n3) / 3.0f;
-	}
-	else if (y == m_gridSizeY - 1)
-	{
-		glm::vec3 n1 = getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-		glm::vec3 n2 = getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-		glm::vec3 n3 = getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-
-		return (n1 + n2 + n3) / 3.0f;
-	}
-	else
-	{
-		glm::vec3 n1 = getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-		glm::vec3 n2 = getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-		glm::vec3 n3 = getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-		glm::vec3 n4 = getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-		glm::vec3 n5 = getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		glm::vec3 n6 = getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-
-		return (n1 + n2 + n3 + n4 + n5 + n6) / 6.0f;
-	}
+	return (n1 + n2) * 0.5f;
 }
 
 // returns the normal direction of a triangle given 3 points
