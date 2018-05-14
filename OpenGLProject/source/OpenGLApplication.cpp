@@ -48,6 +48,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	setup();
 }
@@ -55,10 +56,12 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\textures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\textures.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\specular.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\specular.fs").c_str());
 
 	// load models
-	m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
+	// m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
+	m_terrain = Terrain(256, 256);
+	m_terrain.generateDiamondSquare(32);
 }
 
 void OpenGLApplication::run()
@@ -103,14 +106,20 @@ void OpenGLApplication::render()
 	m_shader.setMat4("projection", projection);
 	m_shader.setMat4("view", view);
 
-	m_shader.setVec3("lightPos", glm::vec3(0.2f, 1.0f, 0.3f));
+	m_shader.setVec3("material.color", glm::vec3(1.0f));
+	m_shader.setFloat("material.ambient", 0.05f);
+	m_shader.setFloat("material.diffuse", 1.0f);
+	m_shader.setFloat("material.specular", 0.3f);
+	m_shader.setFloat("material.shininess", 128.0f);
 
+	m_shader.setVec3("lightDirection", glm::vec3(-0.2f, -1.0f, -0.3f));
 	m_shader.setVec3("viewPos", m_camera.Position);
 
 	// render the loaded model
 	glm::mat4 model;
+	model = glm::scale(model, glm::vec3(1.0f, 8.0f, 1.0f));
 	m_shader.setMat4("model", model);
-	m_model.Draw(m_shader);
+	m_terrain.Draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------
