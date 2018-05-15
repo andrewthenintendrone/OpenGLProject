@@ -15,21 +15,8 @@
 #include <vector>
 using namespace std;
 
-struct Vertex
-{
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
-};
-
-struct Texture
-{
-	unsigned int id; // opengl texture id
-	string type; // type of texture (diffuse, specular, normal, etc.)
-	string path; // file path of the texture
-};
+#include "Texture.h"
+#include "Vertex.h"
 
 class Mesh
 {

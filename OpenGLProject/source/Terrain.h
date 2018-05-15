@@ -3,6 +3,7 @@
 #include <string>
 #include "Array2D.h"
 #include "Mesh.h"
+#include "Vertex.h"
 
 class Terrain
 {

@@ -138,10 +138,7 @@ void Terrain::init()
 	{
 		for (int y = 0; y < m_gridSizeY; y++, i++)
 		{
-			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
-			{
-				vertices[i].Normal = getVertexNormal(y, x);
-			}
+			vertices[i].Normal = getVertexNormal(x, y);
 		}
 	}
 
@@ -241,21 +238,70 @@ void Terrain::setSample(int x, int y, float value)
 // returns the normal of a vertex by averaging the normals of the surrounding faces
 glm::vec3 Terrain::getVertexNormal(int x, int y)
 {
-	int i = y * m_gridSizeX + x;;
+	int i = y * m_gridSizeX + x;
 
-	int i2 = i + 1;
-	int i3 = i + m_gridSizeX;
-	int i4 = i + m_gridSizeX + 1;
+	glm::vec3 normal = glm::vec3(0);
 
-	glm::vec3 posA = vertices[i].Position;
-	glm::vec3 posB = vertices[i2].Position;
-	glm::vec3 posC = vertices[i3].Position;
-	glm::vec3 posD = vertices[i4].Position;
+	// edge cases
+	if (x == 0)
+	{
+		if (y == 0)
+		{
+			normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+			normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+		}
+		else if (y == m_gridSizeY - 1)
+		{
+			normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+		}
+		else
+		{
+			normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+			normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+			normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+		}
+	}
+	else if (x == m_gridSizeX - 1)
+	{
+		if (y == 0)
+		{
+			normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+		}
+		else if (y == m_gridSizeY - 1)
+		{
+			normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+			normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+		}
+		else
+		{
+			normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+			normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+			normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+		}
+	}
+	else if (y == 0)
+	{
+		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	}
+	else if (y == m_gridSizeY - 1)
+	{
+		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+	}
+	else
+	{
+		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	}
 
-	glm::vec3 n1 = glm::cross((posB - posA), (posC - posA));
-	glm::vec3 n2 = glm::cross((posB - posC), (posD - posC));
-
-	return (n1 + n2) * 0.5f;
+	return glm::normalize(normal);
 }
 
 // returns the normal direction of a triangle given 3 points
@@ -266,7 +312,10 @@ glm::vec3 Terrain::getTriangleNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 	glm::vec3 edge2 = (p3 - p1);
 
 	// then the cross product of these two edges will point perpendicular to the triangle
-	glm::vec3 direction = glm::cross(edge1, edge2);
+	glm::vec3 normal = glm::cross(edge1, edge2);
 
-	return direction;
+	// normalize to get the normal
+	normal = glm::normalize(normal);
+
+	return normal;
 }

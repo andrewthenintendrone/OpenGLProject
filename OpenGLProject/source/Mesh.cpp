@@ -4,10 +4,6 @@
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures) :
 	vertices(vertices), indices(indices), textures(textures)
 {
-	//this->vertices = vertices;
-	//this->indices = indices;
-	//this->textures = textures;
-
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	setupMesh();
 }
@@ -20,6 +16,7 @@ void Mesh::Draw(Shader shader)
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;
 	unsigned int heightNr = 1;
+	unsigned int emissiveNr = 1;
 
 	// iterate through textures
 	for (unsigned int i = 0; i < textures.size(); i++)
@@ -37,6 +34,8 @@ void Mesh::Draw(Shader shader)
 			number = std::to_string(normalNr++); // transfer unsigned int to stream
 		else if (name == "texture_height")
 			number = std::to_string(heightNr++); // transfer unsigned int to stream
+		else if (name == "texture_emissive")
+			number = std::to_string(emissiveNr++); // transfer unsigned int to stream
 
 		// now set the sampler to the correct texture unit
 		glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);

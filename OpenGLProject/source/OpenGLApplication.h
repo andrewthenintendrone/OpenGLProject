@@ -43,14 +43,17 @@ private:
 	Shader m_shader;
 
 	// Terrain(s)
-	Terrain m_terrain;
+	// Terrain m_terrain;
 
 	// Model(s)
-	// Model m_model;
+	Model m_model;
 
 	// per-frame time logic
 	// --------------------
 	float m_lastFrame = 0;
 	float m_currentFrame = 0;
 	float m_deltaTime = 0;
+
+	// current material shininess
+	float m_shininess = 32.0f;
 };

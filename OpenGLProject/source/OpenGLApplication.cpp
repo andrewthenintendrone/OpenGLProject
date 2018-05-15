@@ -3,6 +3,8 @@
 #include <experimental\filesystem>
 namespace fs = std::experimental::filesystem;
 
+#include "Color.h"
+
 // callback functions
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -56,12 +58,12 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\specular.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\specular.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\textures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\textures.fs").c_str());
 
 	// load models
-	// m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
-	m_terrain = Terrain(256, 256);
-	m_terrain.generateDiamondSquare(32);
+	m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
+	// m_terrain = Terrain(256, 256);
+	// m_terrain.generatePerlin();
 }
 
 void OpenGLApplication::run()
@@ -106,20 +108,33 @@ void OpenGLApplication::render()
 	m_shader.setMat4("projection", projection);
 	m_shader.setMat4("view", view);
 
-	m_shader.setVec3("material.color", glm::vec3(1.0f));
-	m_shader.setFloat("material.ambient", 0.05f);
-	m_shader.setFloat("material.diffuse", 1.0f);
-	m_shader.setFloat("material.specular", 0.3f);
-	m_shader.setFloat("material.shininess", 128.0f);
+	float time = glfwGetTime();
 
+	// material properties
+	if (std::sin(time) < 0.0f)
+	{
+		m_shader.setVec3("material.color", Color::Splatoon2Lemon().asVec4());
+	}
+	else
+	{
+		m_shader.setVec3("material.color", Color::Splatoon2Plum().asVec4());
+	}
+	m_shader.setFloat("material.ambient", 0.2f);
+	m_shader.setFloat("material.diffuse", 0.5f);
+	m_shader.setFloat("material.specular", 1.0f);
+	m_shader.setFloat("material.shininess", m_shininess);
+
+	// light properties
 	m_shader.setVec3("lightDirection", glm::vec3(-0.2f, -1.0f, -0.3f));
+
 	m_shader.setVec3("viewPos", m_camera.Position);
 
 	// render the loaded model
 	glm::mat4 model;
-	model = glm::scale(model, glm::vec3(1.0f, 8.0f, 1.0f));
+	//model = glm::scale(model, glm::vec3(1.0f / 16.0f, 8.0f, 1.0f / 16.0f));
 	m_shader.setMat4("model", model);
-	m_terrain.Draw(m_shader);
+	//m_terrain.Draw(m_shader);
+	m_model.Draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------
@@ -154,6 +169,16 @@ void OpenGLApplication::processInput()
 	else
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	// adjust shininess with up and down
+	if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		m_shininess = std::min(256.0f, m_shininess + m_deltaTime * 100.0f);
+	}
+	else if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		m_shininess = std::max(32.0f, m_shininess - m_deltaTime * 100.0f);
 	}
 }
 
