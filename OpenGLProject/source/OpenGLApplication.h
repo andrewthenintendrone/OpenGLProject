@@ -11,6 +11,8 @@
 #include "Model.h"
 #include "Terrain.h"
 
+#include "Mesh2.h"
+
 // OpenGLApplication class that manages everything
 class OpenGLApplication
 {
@@ -46,7 +48,8 @@ private:
 	// Terrain m_terrain;
 
 	// Model(s)
-	Model m_model;
+	// Model m_model;
+	Mesh2 mesh;
 
 	// per-frame time logic
 	// --------------------

@@ -153,6 +153,7 @@
     <ClCompile Include="source\glad.c" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\Mesh2.cpp" />
     <ClCompile Include="source\Model.cpp" />
     <ClCompile Include="source\OpenGLApplication.cpp" />
     <ClCompile Include="source\PerlinNoise.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Color.h" />
     <ClInclude Include="source\Mesh.h" />
+    <ClInclude Include="source\Mesh2.h" />
     <ClInclude Include="source\Model.h" />
     <ClInclude Include="source\OpenGLApplication.h" />
     <ClInclude Include="source\PerlinNoise.h" />
@@ -171,6 +173,7 @@
     <ClInclude Include="source\Terrain.h" />
     <ClInclude Include="source\Texture.h" />
     <ClInclude Include="source\Vertex.h" />
+    <ClInclude Include="source\Vertex2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

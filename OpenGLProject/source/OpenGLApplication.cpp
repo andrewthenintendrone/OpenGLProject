@@ -50,7 +50,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 
 	setup();
 }
@@ -58,12 +58,13 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\textures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\textures.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\simple.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\simple.fs").c_str());
 
 	// load models
-	m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
+	// m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
 	// m_terrain = Terrain(256, 256);
 	// m_terrain.generatePerlin();
+	mesh.initialiseCylinder(1, 1, 128);
 }
 
 void OpenGLApplication::run()
@@ -96,46 +97,31 @@ void OpenGLApplication::render()
 {
 	// render
 	// ------
-	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// don't forget to enable shader before setting uniforms
 	m_shader.use();
 
-	// view/projection transformations
-	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
-	glm::mat4 view = m_camera.GetViewMatrix();
-	m_shader.setMat4("projection", projection);
-	m_shader.setMat4("view", view);
-
 	float time = glfwGetTime() * 3.0f;
 
-	// material properties
-	if (std::sin(time) < 0.0f)
+	// projection / view / model transformations
+	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
+	glm::mat4 view = m_camera.GetViewMatrix();
+	for (int x = 0; x < 10; x++)
 	{
-		m_shader.setVec3("material.color", Color::Splatoon2NeonGreen().asVec4());
+		glm::mat4 model = glm::mat4(1);
+		//model = glm::rotate(model, time, glm::vec3(0, (float)x / 5.0f * 360.0f, 0));
+		model = glm::translate(model, glm::vec3(0, x * 5.0f, 0));
+		model = glm::scale(model, glm::vec3(10));
+
+		glm::mat4 projectionViewModelMatrix = projection * view * model;
+
+		m_shader.setMat4("ProjectionViewModel", projectionViewModelMatrix);
+		m_shader.setVec4("glowColor", glm::vec4(std::sin(time), std::cos(time), 1, 1));
+
+		mesh.draw();
 	}
-	else
-	{
-		m_shader.setVec3("material.color", Color::Splatoon2NeonPink().asVec4());
-	}
-	m_shader.setFloat("material.ambient", 0.2f);
-	m_shader.setFloat("material.diffuse", 0.5f);
-	m_shader.setFloat("material.specular", 0.6f);
-	m_shader.setFloat("material.shininess", m_shininess);
-
-	// light properties
-	m_shader.setVec3("lightDirection", glm::vec3(-0.2f, -1.0f, -0.3f));
-
-	m_shader.setVec3("viewPos", m_camera.Position);
-
-	// render the loaded model
-	glm::mat4 model;
-	//model = glm::scale(model, glm::vec3(1.0f / 16.0f, 8.0f, 1.0f / 16.0f));
-	model = glm::rotate(model, time, glm::vec3(0, 1, 0));
-	m_shader.setMat4("model", model);
-	//m_terrain.Draw(m_shader);
-	m_model.Draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------
