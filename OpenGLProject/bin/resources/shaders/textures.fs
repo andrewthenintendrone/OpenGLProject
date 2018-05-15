@@ -38,6 +38,9 @@ void main()
 	// sample diffuse map
 	vec3 color = texture(texture_diffuse1, fs_in.TexCoords).rgb;
 	
+	// sample specular map
+	vec3 specmap = texture(texture_specular1, fs_in.TexCoords).rgb;
+	
 	// sample other map
 	float tcl = texture(texture_emissive1, fs_in.TexCoords).b;
 	
@@ -54,14 +57,14 @@ void main()
 	// specular
 	vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
-	vec3 specular = vec3(material.specular) * spec;
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), specmap.g * material.shininess);
+	vec3 specular = vec3(material.specular) * spec * specmap.g;
 	
-	vec3 result = ambient + diffuse;
+	vec3 result = ambient + diffuse + specular;
 	
 	// gamma correction
-	// float gamma = 2.2;
-	// result = pow(result, vec3(1.0 / gamma));
+	float gamma = 2.5;
+	result = pow(result, vec3(1.0 / gamma));
 	
 	FragColor = vec4(result, 1.0);
 }

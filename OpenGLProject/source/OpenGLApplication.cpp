@@ -108,20 +108,20 @@ void OpenGLApplication::render()
 	m_shader.setMat4("projection", projection);
 	m_shader.setMat4("view", view);
 
-	float time = glfwGetTime();
+	float time = glfwGetTime() * 3.0f;
 
 	// material properties
 	if (std::sin(time) < 0.0f)
 	{
-		m_shader.setVec3("material.color", Color::Splatoon2Lemon().asVec4());
+		m_shader.setVec3("material.color", Color::Splatoon2NeonGreen().asVec4());
 	}
 	else
 	{
-		m_shader.setVec3("material.color", Color::Splatoon2Plum().asVec4());
+		m_shader.setVec3("material.color", Color::Splatoon2NeonPink().asVec4());
 	}
 	m_shader.setFloat("material.ambient", 0.2f);
 	m_shader.setFloat("material.diffuse", 0.5f);
-	m_shader.setFloat("material.specular", 1.0f);
+	m_shader.setFloat("material.specular", 0.6f);
 	m_shader.setFloat("material.shininess", m_shininess);
 
 	// light properties
@@ -132,6 +132,7 @@ void OpenGLApplication::render()
 	// render the loaded model
 	glm::mat4 model;
 	//model = glm::scale(model, glm::vec3(1.0f / 16.0f, 8.0f, 1.0f / 16.0f));
+	model = glm::rotate(model, time, glm::vec3(0, 1, 0));
 	m_shader.setMat4("model", model);
 	//m_terrain.Draw(m_shader);
 	m_model.Draw(m_shader);
