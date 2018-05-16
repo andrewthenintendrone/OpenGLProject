@@ -64,7 +64,7 @@ void OpenGLApplication::setup()
 	// m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
 	// m_terrain = Terrain(256, 256);
 	// m_terrain.generatePerlin();
-	mesh.initialiseCylinder(1, 1, 128);
+	mesh.initialiseCylinder(3, 6, 8);
 }
 
 void OpenGLApplication::run()
@@ -108,20 +108,16 @@ void OpenGLApplication::render()
 	// projection / view / model transformations
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
 	glm::mat4 view = m_camera.GetViewMatrix();
-	for (int x = 0; x < 10; x++)
-	{
-		glm::mat4 model = glm::mat4(1);
-		//model = glm::rotate(model, time, glm::vec3(0, (float)x / 5.0f * 360.0f, 0));
-		model = glm::translate(model, glm::vec3(0, x * 5.0f, 0));
-		model = glm::scale(model, glm::vec3(10));
+	glm::mat4 model(1);
+	model = glm::scale(model, glm::vec3(10));
+	
+	// combine matrices
+	glm::mat4 pvmMatrix = projection * view * model;
 
-		glm::mat4 projectionViewModelMatrix = projection * view * model;
+	m_shader.setMat4("ProjectionViewModel", pvmMatrix);
+	m_shader.setVec4("drawColor", Color::Splatoon2Blue().asVec4());
 
-		m_shader.setMat4("ProjectionViewModel", projectionViewModelMatrix);
-		m_shader.setVec4("glowColor", glm::vec4(std::sin(time), std::cos(time), 1, 1));
-
-		mesh.draw();
-	}
+	mesh.draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------

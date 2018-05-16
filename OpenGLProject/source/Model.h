@@ -20,8 +20,6 @@
 #include <vector>
 using namespace std;
 
-extern unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
-
 class Model
 {
 public:

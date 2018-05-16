@@ -1,25 +1,31 @@
 #pragma once
 #include "Vertex2.h"
+#include "Texture.h"
+#include "Shader.h"
+#include <vector>
 
 class Mesh2
 {
 public:
 
-	Mesh2() : triCount(0), vao(0), ibo(0) {}
+	Mesh2() {}
 	virtual ~Mesh2();
 
-	void initialise(unsigned int vertexCount, const Vertex2* vertices,
-		unsigned int indexCount = 0,
-		unsigned int* indices = nullptr);
+	void initialise(std::vector<Vertex2> verts, std::vector<unsigned int>* indices = nullptr, Texture* texture = nullptr);
 
 	void initialiseQuad();
 	void initialiseBox();
-	void initialiseCylinder(float radius, float height, float segments);
+	void initialiseCircle(float radius, int segments);
+	void initialiseCylinder(float radius, float height, int segments);
 
-	virtual void draw();
+	virtual void draw(Shader shader);
 
 protected:
 
-	unsigned int triCount;
 	unsigned int vao, vbo, ibo;
+
+	std::vector<Vertex2> m_verts;
+	std::vector<unsigned int> m_indices;
+
+	Texture m_texture;
 };

@@ -159,6 +159,7 @@
     <ClCompile Include="source\PerlinNoise.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
+    <ClCompile Include="source\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Array2D.h" />
