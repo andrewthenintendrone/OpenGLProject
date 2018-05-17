@@ -2,6 +2,7 @@
 
 #include <experimental\filesystem>
 namespace fs = std::experimental::filesystem;
+#include <iostream>
 
 #include "Color.h"
 
@@ -58,13 +59,10 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\simple.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\simple.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\shadelesstextures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\shadelesstextures.fs").c_str());
 
-	// load models
-	// m_model = Model(fs::current_path().string() + "\\resources\\objects\\brush\\brush.obj");
-	// m_terrain = Terrain(256, 256);
-	// m_terrain.generatePerlin();
-	mesh.initialiseCylinder(3, 6, 8);
+	// generate cylinder
+	m_mesh.initialiseCylinder(3, 6, 8);
 }
 
 void OpenGLApplication::run()
@@ -103,21 +101,18 @@ void OpenGLApplication::render()
 	// don't forget to enable shader before setting uniforms
 	m_shader.use();
 
-	float time = glfwGetTime() * 3.0f;
-
 	// projection / view / model transformations
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
 	glm::mat4 view = m_camera.GetViewMatrix();
 	glm::mat4 model(1);
-	model = glm::scale(model, glm::vec3(10));
 	
 	// combine matrices
 	glm::mat4 pvmMatrix = projection * view * model;
 
 	m_shader.setMat4("ProjectionViewModel", pvmMatrix);
-	m_shader.setVec4("drawColor", Color::Splatoon2Blue().asVec4());
 
-	mesh.draw(m_shader);
+	// draw mesh
+	m_mesh.draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 	// -------------------------------------------------------------------------------

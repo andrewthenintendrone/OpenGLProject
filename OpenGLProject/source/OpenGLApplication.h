@@ -8,10 +8,7 @@
 
 #include "Shader.h"
 #include "Camera.h"
-#include "Model.h"
-#include "Terrain.h"
-
-#include "Mesh2.h"
+#include "Mesh.h"
 
 // OpenGLApplication class that manages everything
 class OpenGLApplication
@@ -44,12 +41,8 @@ private:
 	// Shader(s)
 	Shader m_shader;
 
-	// Terrain(s)
-	// Terrain m_terrain;
-
-	// Model(s)
-	// Model m_model;
-	Mesh2 mesh;
+	// Mesh(es)
+	Mesh m_mesh;
 
 	// per-frame time logic
 	// --------------------

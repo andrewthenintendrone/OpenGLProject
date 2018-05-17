@@ -5,6 +5,7 @@
 #include "PerlinNoise.h"
 #include <fstream>
 
+// returns a random float between min and max
 float frand(float min, float max)
 {
 	float f = (float)rand() / RAND_MAX;
@@ -86,34 +87,30 @@ void Terrain::readRaw(const std::string& filename)
 	init();
 }
 
-// draw the Terrain using the supplied Shader
-void Terrain::Draw(Shader shader)
-{
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
-
 // send data to the GPU
 void Terrain::init()
 {
+	// create vectors for vertices and indices
+	std::vector<Vertex> verts;
+	std::vector<unsigned int> indices;
+
 	// generate mesh
 	for (int x = 0, i = 0; x < m_gridSizeX; x++)
 	{
 		for (int y = 0; y < m_gridSizeY; y++, i++)
 		{
-			Vertex vert;
+			Vertex currentVertex;
 
 			// sample heights
 			float currentHeight = m_heights(x, y);
 
 			// set vertex position
-			vert.Position = glm::vec3(x - m_gridSizeX / 2.0f, currentHeight, y - m_gridSizeY / 2.0f);
+			currentVertex.position = glm::vec4(x - m_gridSizeX / 2.0f, currentHeight, y - m_gridSizeY / 2.0f, 1.0f);
 
 			// set texture coordinates (currently unused)
-			vert.TexCoords = glm::vec2((float)x / (float)m_gridSizeX, (float)y / (float)m_gridSizeY);
+			currentVertex.texcoord = glm::vec2((float)x / (float)m_gridSizeX, (float)y / (float)m_gridSizeY);
 
-			vertices.push_back(vert);
+			verts.push_back(currentVertex);
 
 			// create triangles
 			if (x < m_gridSizeX - 1 && y < m_gridSizeY - 1)
@@ -138,44 +135,11 @@ void Terrain::init()
 	{
 		for (int y = 0; y < m_gridSizeY; y++, i++)
 		{
-			vertices[i].Normal = getVertexNormal(x, y);
+			verts[i].normal = glm::vec4(getVertexNormal(x, y), 1.0f);
 		}
 	}
 
-	// create buffers/arrays
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO);
-	// load data into vertex buffers
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// A great thing about structs is that their memory layout is sequential for all its items.
-	// The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-	// again translates to 3/2 floats which translates to a byte array.
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-
-	// set the vertex attribute pointers
-	// vertex Positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	// vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-	// vertex texture coords
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-	// vertex tangent
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-	// vertex bitangent
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
-
-	glBindVertexArray(0);
 }
 
 // diamond square algorithm
@@ -238,70 +202,71 @@ void Terrain::setSample(int x, int y, float value)
 // returns the normal of a vertex by averaging the normals of the surrounding faces
 glm::vec3 Terrain::getVertexNormal(int x, int y)
 {
-	int i = y * m_gridSizeX + x;
+	//int i = y * m_gridSizeX + x;
 
-	glm::vec3 normal = glm::vec3(0);
+	//glm::vec3 normal = glm::vec3(0);
 
-	// edge cases
-	if (x == 0)
-	{
-		if (y == 0)
-		{
-			normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-			normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-		}
-		else if (y == m_gridSizeY - 1)
-		{
-			normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-		}
-		else
-		{
-			normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-			normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-			normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-		}
-	}
-	else if (x == m_gridSizeX - 1)
-	{
-		if (y == 0)
-		{
-			normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		}
-		else if (y == m_gridSizeY - 1)
-		{
-			normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-			normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-		}
-		else
-		{
-			normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-			normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-			normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-		}
-	}
-	else if (y == 0)
-	{
-		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-	}
-	else if (y == m_gridSizeY - 1)
-	{
-		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-	}
-	else
-	{
-		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-	}
+	//// edge cases
+	//if (x == 0)
+	//{
+	//	if (y == 0)
+	//	{
+	//		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+	//		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	//	}
+	//	else if (y == m_gridSizeY - 1)
+	//	{
+	//		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+	//	}
+	//	else
+	//	{
+	//		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+	//		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	//		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+	//	}
+	//}
+	//else if (x == m_gridSizeX - 1)
+	//{
+	//	if (y == 0)
+	//	{
+	//		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+	//	}
+	//	else if (y == m_gridSizeY - 1)
+	//	{
+	//		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+	//		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	//	}
+	//	else
+	//	{
+	//		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+	//		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+	//		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	//	}
+	//}
+	//else if (y == 0)
+	//{
+	//	normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+	//	normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+	//	normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	//}
+	//else if (y == m_gridSizeY - 1)
+	//{
+	//	normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+	//	normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	//	normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+	//}
+	//else
+	//{
+	//	normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
+	//	normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
+	//	normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
+	//	normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
+	//	normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
+	//	normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
+	//}
 
-	return glm::normalize(normal);
+	//return glm::normalize(normal);
+	return glm::vec3(0, 1, 0);
 }
 
 // returns the normal direction of a triangle given 3 points

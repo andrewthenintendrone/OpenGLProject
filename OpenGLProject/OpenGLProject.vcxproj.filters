@@ -30,9 +30,6 @@
     <ClCompile Include="source\OpenGLApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
     <ClCompile Include="source\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Mesh2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,9 +51,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Camera.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Model.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Mesh.h">
@@ -84,12 +75,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Color.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Mesh2.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Vertex2.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,9 +4,7 @@
 class Vertex
 {
 public:
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
+	glm::vec4 position = glm::vec4(0, 0, 0, 1);
+	glm::vec2 texcoord = glm::vec2(0.5f, 0.5f);
+	glm::vec4 normal = glm::vec4(0, 1, 0, 1);
 };

@@ -1,58 +1,76 @@
 #include "Texture.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+#include <stb\stb_image.h>
 #include <glad\glad.h>
 #include <iostream>
 
 void Texture::loadFromFile(const std::string& filename)
 {
-	// do not try to load if this texture is already loaded
+	// don't try to load if this texture is already initialised
 	assert(id == 0);
 
-	// store filename
+	// store file path
 	path = filename;
 
+	// generate textures
 	glGenTextures(1, &id);
 
-	// load file with stbi_image
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+	// create variables for texture size and format
+	int width, height, channels;
 
-	// if the image loaded succesfully
+	// attempt to read texture
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+
+	// if data was read succesfully
 	if (data)
 	{
-		// determine image format from number of channels
+		std::cout << "Loaded texture from " << path << std::endl;
+
+		// determine texture format
 		GLenum format;
-		if (nrComponents == 1)
+		switch (channels)
+		{
+			// 1 channel texture
+		case(1):
 			format = GL_RED;
-		else if (nrComponents == 3)
+			break;
+			// 3 channel rgb texture
+		case(3):
 			format = GL_RGB;
-		else if (nrComponents == 4)
+			break;
+			// 4 channel rgba texture
+		case(4):
 			format = GL_RGBA;
+			break;
+		default:
+			std::cout << "Unknown number of channels\n";
+			break;
+		}
 
 		// bind our texture id
 		glBindTexture(GL_TEXTURE_2D, id);
 
-		// generate texture
+		// transfer texture data to gpu
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-		// create mipmaps
+		// generate mip maps
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		// make the image repeat and use linear filtering
+		// set texture repeat settings
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		// set texture filter settings
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		// release image from memory (it is on the gpu now)
+		// free image data (it is already on the GPU)
 		stbi_image_free(data);
 	}
 	else
 	{
-		std::cout << "Failed to load a Texture from " << path << std::endl;
-
-		// release image from memory
+		std::cout << "Failed to load a texture from " << path << std::endl;
 		stbi_image_free(data);
+		return;
 	}
 }

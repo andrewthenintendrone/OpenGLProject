@@ -5,23 +5,15 @@
 #include "Mesh.h"
 #include "Vertex.h"
 
-class Terrain
+class Terrain : Mesh
 {
 public:
-
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
-	unsigned int VAO;
 
 	Terrain(unsigned int gridSizeX = 1, unsigned int gridSizeY = 1);
 
 	void generatePerlin();
 	void generateDiamondSquare(int featureSize);
 	void readRaw(const std::string& filename);
-
-	void Draw(Shader shader);
 
 private:
 
@@ -32,8 +24,6 @@ private:
 	Array2D<float> m_heights;
 
 	void init();
-
-	unsigned int VBO, EBO;
 
 	void diamondSquare(int stepSize, float scale);
 

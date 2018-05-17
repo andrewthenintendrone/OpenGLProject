@@ -1,46 +1,31 @@
-#ifndef MESH_H
-#define MESH_H
-
-#include <glad/glad.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "Shader.h"
-
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <vector>
-using namespace std;
-
-#include "Texture.h"
+#pragma once
 #include "Vertex.h"
+#include "Texture.h"
+#include "Shader.h"
+#include <vector>
 
 class Mesh
 {
-
 public:
-	
-	// mesh data
-	vector<Vertex> vertices;
-	vector<unsigned int> indices;
-	vector<Texture> textures;
-	unsigned int VAO; // vertex array object
 
-	// default constructor
 	Mesh() {}
+	virtual ~Mesh();
 
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
+	void initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indices = nullptr, Texture* texture = nullptr);
 
-	void Draw(Shader shader);
+	void initialiseQuad();
+	void initialiseBox();
+	void initialiseCircle(float radius, int segments);
+	void initialiseCylinder(float radius, float height, int segments);
+
+	virtual void draw(Shader shader);
 
 protected:
-	
-	unsigned int VBO; // vertex buffer object
-	unsigned int EBO; // element buffer object
 
-	void setupMesh();
+	unsigned int vao, vbo, ibo;
+
+	std::vector<Vertex> m_verts;
+	std::vector<unsigned int> m_indices;
+
+	Texture m_texture;
 };
-#endif
