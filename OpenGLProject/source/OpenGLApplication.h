@@ -44,14 +44,4 @@ private:
 
 	// Mesh(es)
 	Mesh m_mesh;
-	OBJMesh m_objMesh;
-
-	// per-frame time logic
-	// --------------------
-	float m_lastFrame = 0;
-	float m_currentFrame = 0;
-	float m_deltaTime = 0;
-
-	// current material shininess
-	float m_shininess = 32.0f;
 };

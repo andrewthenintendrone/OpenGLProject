@@ -159,6 +159,7 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
     <ClCompile Include="source\Texture.cpp" />
+    <ClCompile Include="source\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Array2D.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="source\Shader.h" />
     <ClInclude Include="source\Terrain.h" />
     <ClInclude Include="source\Texture.h" />
+    <ClInclude Include="source\Time.h" />
     <ClInclude Include="source\Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

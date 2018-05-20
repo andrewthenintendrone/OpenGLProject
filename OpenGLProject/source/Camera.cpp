@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Time.h"
 
 // Constructor with vectors
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -27,9 +28,9 @@ glm::mat4 Camera::GetViewMatrix()
 }
 
 // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
+void Camera::ProcessKeyboard(Camera_Movement direction)
 {
-	float velocity = (run ? MovementSpeed * 10 : MovementSpeed) * deltaTime;
+	float velocity = (run ? MovementSpeed * 10 : MovementSpeed) * Time::getInstance().deltaTime();
 	if (direction == FORWARD)
 		Position += Front * velocity;
 	if (direction == BACKWARD)
