@@ -4,7 +4,7 @@
 #include <glad\glad.h>
 #include <iostream>
 
-void Texture::loadFromFile(const std::string& filename)
+void Texture::load(const std::string& filename)
 {
 	// don't try to load if this texture is already initialised
 	assert(id == 0);

@@ -45,6 +45,9 @@
     <ClCompile Include="source\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\OBJMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Shader.h">
@@ -75,6 +78,15 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Color.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\OBJMesh.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Material.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MeshChunk.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

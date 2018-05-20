@@ -51,7 +51,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 	setup();
 }
@@ -59,10 +59,12 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shaders
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\shadelesstextures.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\shadelesstextures.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\diffuse.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\diffuse.fs").c_str());
 
-	// generate cylinder
-	m_mesh.initialiseCylinder(3, 6, 8);
+	// generate floor
+	m_mesh.initialiseQuad();
+	// load model
+	m_objMesh.load(fs::current_path().string() + "\\resources\\objects\\n64\\n64.obj");
 }
 
 void OpenGLApplication::run()
@@ -103,15 +105,44 @@ void OpenGLApplication::render()
 
 	// projection / view / model transformations
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
+	m_shader.setMat4("projection", projection);
 	glm::mat4 view = m_camera.GetViewMatrix();
+	m_shader.setMat4("view", view);
 	glm::mat4 model(1);
-	
-	// combine matrices
-	glm::mat4 pvmMatrix = projection * view * model;
+	// get elapsed time
+	float time = glfwGetTime();
 
-	m_shader.setMat4("ProjectionViewModel", pvmMatrix);
+	for (int x = 0; x < 5; x++)
+	{
+		for (int y = 0; y < 5; y++)
+		{
+			model = glm::mat4(1);
+			model = glm::scale(model, glm::vec3(1, std::sin(time * 17.5) * 0.5f + 0.75f, 1) * 0.5f);
+			model = glm::translate(model, glm::vec3(x * 10, 0, y * 10));
+			model = glm::rotate(model, time, glm::vec3(0, 1, 0));
 
-	// draw mesh
+			m_shader.setMat4("model", model);
+			if (x % 2 == 0 ^ y % 2 == 0)
+			{
+				m_shader.setVec4("color", Color::Splatoon2LightPink().asVec4());
+			}
+			else
+			{
+				m_shader.setVec4("color", Color::Splatoon2DarkPurple().asVec4());
+			}
+
+			// draw mesh
+			m_objMesh.draw();
+		}
+	}
+
+	model = glm::mat4(1);
+	model = glm::translate(model, glm::vec3(20, 0, 20));
+	model = glm::scale(model, glm::vec3(50, 1, 50));
+
+	m_shader.setMat4("model", model);
+	m_shader.setVec4("color", Color::White().asVec4());
+
 	m_mesh.draw(m_shader);
 
 	// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

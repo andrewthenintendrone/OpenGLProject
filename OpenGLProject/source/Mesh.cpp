@@ -124,7 +124,6 @@ void Mesh::initialiseCircle(float radius, int segments)
 	for (int i = 0; i < segments + 1; i++)
 	{
 		Vertex currentVertex;
-		currentVertex.position = glm::vec4(0, 0, 0, 1);
 
 		// middle of circle
 		if (i == 0)
@@ -150,11 +149,7 @@ void Mesh::initialiseCircle(float radius, int segments)
 		indices.push_back(i % segments + 1);
 	}
 
-	// load texture
-	Texture texture;
-
-
-	initialise(verts, &indices, &texture);
+	initialise(verts, &indices);
 }
 
 void Mesh::initialiseCylinder(float radius, float height, int segments)
@@ -187,16 +182,9 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 		verts.push_back(currentVertex);
 
 		// add indices
-		indices.push_back(0);
+		indices.push_back(i % segments + 1);
 		indices.push_back(i);
-		if (i == segments)
-		{
-			indices.push_back(1);
-		}
-		else
-		{
-			indices.push_back(i + 1);
-		}
+		indices.push_back(0);
 	}
 	// create bottom circle verts / indices
 	for (int i = 0; i < segments + 1; i++)
@@ -224,48 +212,23 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 
 		// add indices
 		indices.push_back(segments + 1);
-		indices.push_back(segments + 1 + i);
-		if (i == segments)
-		{
-			indices.push_back(segments + 2);
-		}
-		else
-		{
-			indices.push_back(segments + 2 + i);
-		}
+		indices.push_back(i + segments + 1);
+		indices.push_back(i % segments + segments + 2);
 	}
 
 	// create outer indices
 	for (int i = 1; i < segments + 1; i++)
 	{
 		indices.push_back(i);
-		if (i == segments)
-		{
-			indices.push_back(1);
-		}
-		else
-		{
-			indices.push_back(i + 1);
-		}
+		indices.push_back(i % segments + 1);
 		indices.push_back(i + segments + 1);
 
+		indices.push_back(i % segments + 1);
+		indices.push_back(i % segments + segments + 2);
 		indices.push_back(i + segments + 1);
-		if (i == segments)
-		{
-			indices.push_back(segments + 2);
-		}
-		else
-		{
-			indices.push_back(i + segments + 2);
-		}
-		indices.push_back(i);
 	}
 
-	// load texture
-	Texture texture;
-	texture.loadFromFile("C:/Users/Andrew/Pictures/oblivionwalker.png");
-
-	initialise(verts, &indices, &texture);
+	initialise(verts, &indices);
 }
 
 void Mesh::draw(Shader shader)

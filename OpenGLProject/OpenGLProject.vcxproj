@@ -99,7 +99,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\;$(SolutionDir)\lib\32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -111,7 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\;$(SolutionDir)\lib\64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -127,7 +127,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\;$(SolutionDir)\lib\32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -143,7 +143,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\;$(SolutionDir)\lib\64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -153,6 +153,7 @@
     <ClCompile Include="source\glad.c" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\OBJMesh.cpp" />
     <ClCompile Include="source\OpenGLApplication.cpp" />
     <ClCompile Include="source\PerlinNoise.cpp" />
     <ClCompile Include="source\Shader.cpp" />
@@ -163,7 +164,10 @@
     <ClInclude Include="source\Array2D.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Color.h" />
+    <ClInclude Include="source\Material.h" />
     <ClInclude Include="source\Mesh.h" />
+    <ClInclude Include="source\MeshChunk.h" />
+    <ClInclude Include="source\OBJMesh.h" />
     <ClInclude Include="source\OpenGLApplication.h" />
     <ClInclude Include="source\PerlinNoise.h" />
     <ClInclude Include="source\Shader.h" />

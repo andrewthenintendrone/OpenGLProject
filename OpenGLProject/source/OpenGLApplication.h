@@ -9,6 +9,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "OBJMesh.h"
 
 // OpenGLApplication class that manages everything
 class OpenGLApplication
@@ -43,6 +44,7 @@ private:
 
 	// Mesh(es)
 	Mesh m_mesh;
+	OBJMesh m_objMesh;
 
 	// per-frame time logic
 	// --------------------
