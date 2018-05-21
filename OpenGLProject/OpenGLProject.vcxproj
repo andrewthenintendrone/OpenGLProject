@@ -165,6 +165,7 @@
     <ClInclude Include="source\Array2D.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Color.h" />
+    <ClInclude Include="source\Light.h" />
     <ClInclude Include="source\Material.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\MeshChunk.h" />

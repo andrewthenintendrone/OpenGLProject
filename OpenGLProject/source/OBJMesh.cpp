@@ -182,8 +182,8 @@ void OBJMesh::draw(bool usePatches)
 
 	int alphaTexUniform = glGetUniformLocation(program, "alphaTexture");
 	int ambientTexUniform = glGetUniformLocation(program, "ambientTexture");
-	int diffuseTexUniform = glGetUniformLocation(program, "diffuseTexture");
-	int specTexUniform = glGetUniformLocation(program, "specularTexture");
+	int diffuseTexUniform = glGetUniformLocation(program, "material.diffuseTexture");
+	int specTexUniform = glGetUniformLocation(program, "material.specularTexture");
 	int specHighlightTexUniform = glGetUniformLocation(program, "specularHighlightTexture");
 	int normalTexUniform = glGetUniformLocation(program, "normalTexture");
 	int dispTexUniform = glGetUniformLocation(program, "displacementTexture");

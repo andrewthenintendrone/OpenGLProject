@@ -95,5 +95,8 @@
     <ClInclude Include="source\Time.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\Light.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -69,7 +69,18 @@ void OpenGLApplication::setup()
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
+	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\bunny\\bunny.obj", true, true);
+
+	// set up light
+	m_light.ambient = glm::vec3(1);
+	m_light.diffuse = glm::vec3(1);
+	m_light.specular = glm::vec3(1);
+
+	// set up material
+	m_material.ambient = Color::MediumPurple().asVec3() * 0.25f;
+	m_material.diffuse = Color::MediumPurple().asVec3();
+	m_material.specular = Color::White().asVec3();
+	m_material.specularPower = 64.0f;
 }
 
 void OpenGLApplication::run()
@@ -103,6 +114,8 @@ void OpenGLApplication::render()
 	// enable shader
 	m_shader.use();
 
+	float time = glfwGetTime();
+
 	// get projection matrix
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
 
@@ -111,7 +124,8 @@ void OpenGLApplication::render()
 
 	// get model matrix
 	glm::mat4 model(1);
-	// model = glm::scale(model, glm::vec3(10));
+	model = glm::rotate(model, time, glm::vec3(0, 1, 0));
+	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
 	glm::mat4 pvm = projection * view * model;
@@ -121,17 +135,26 @@ void OpenGLApplication::render()
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
-	float time = glfwGetTime();
+	// update light
+	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
+		//glm::sin(time * 2), 0));
+	m_light.direction = glm::vec3(0, 0, -1);
+	m_shader.setVec3("light.direction", m_light.direction);
+	m_shader.setVec3("light.ambient", m_light.ambient);
+	m_shader.setVec3("light.diffuse", m_light.diffuse);
+	m_shader.setVec3("light.specular", m_light.specular);
 
-	// rotate light
-	glm::vec3 lightDirection = glm::normalize(glm::vec3(glm::cos(time * 2),
-		glm::sin(time * 2), 0));
-	m_shader.setVec3("lightDirection", lightDirection);
+	// update material
+	m_shader.setVec3("material.ambient", m_material.ambient);
+	m_shader.setVec3("material.diffuse", m_material.diffuse);
+	m_shader.setVec3("material.specular", m_material.specular);
+	m_shader.setFloat("material.specularPower", m_material.specularPower);
+
+	// send camera position
+	m_shader.setVec3("cameraPosition", m_camera.Position);
 
 	// draw mesh
 	m_mesh.draw();
-
-
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

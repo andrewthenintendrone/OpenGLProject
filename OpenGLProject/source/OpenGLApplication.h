@@ -43,6 +43,12 @@ private:
 	// Shader(s)
 	Shader m_shader;
 
+	// Light(s)
+	Light m_light;
+
+	// Material(s)
+	Material m_material;
+
 	// Mesh(es)
 	OBJMesh m_mesh;
 };
