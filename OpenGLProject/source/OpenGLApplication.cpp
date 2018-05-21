@@ -1,5 +1,7 @@
 #include "OpenGLApplication.h"
 
+#include <glm\gtc\matrix_inverse.hpp>
+
 #include <experimental\filesystem>
 namespace fs = std::experimental::filesystem;
 #include <iostream>
@@ -16,6 +18,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 {
 	// initialise glfw
 	glfwInit();
+
 	// tell glfw we will be using OpenGL 4.3 core
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -63,10 +66,10 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\diffuse.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\diffuse.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.initialiseCylinder(1, 6, 32);
+	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
 }
 
 void OpenGLApplication::run()
@@ -100,23 +103,35 @@ void OpenGLApplication::render()
 	// enable shader
 	m_shader.use();
 
-	// set projection matrix
+	// get projection matrix
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
-	m_shader.setMat4("projection", projection);
 
-	// set view matrix
+	// get view matrix
 	glm::mat4 view = m_camera.GetViewMatrix();
-	m_shader.setMat4("view", view);
 
-	// set model matrix
+	// get model matrix
 	glm::mat4 model(1);
-	m_shader.setMat4("model", model);
+	// model = glm::scale(model, glm::vec3(10));
 
-	// set render color
-	m_shader.setVec4("color", Color::White().asVec4());
+	// combine matrices
+	glm::mat4 pvm = projection * view * model;
+	m_shader.setMat4("ProjectionViewModel", pvm);
+
+	// send normal matrix
+	glm::mat3 normalMatrix = glm::inverseTranspose(model);
+	m_shader.setMat3("NormalMatrix", normalMatrix);
+
+	float time = glfwGetTime();
+
+	// rotate light
+	glm::vec3 lightDirection = glm::normalize(glm::vec3(glm::cos(time * 2),
+		glm::sin(time * 2), 0));
+	m_shader.setVec3("lightDirection", lightDirection);
 
 	// draw mesh
-	m_mesh.draw(m_shader);
+	m_mesh.draw();
+
+
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

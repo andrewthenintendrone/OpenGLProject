@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <algorithm>
+#include <glm\vec3.hpp>
 #include <glm\vec4.hpp>
 
 class Color
@@ -25,6 +26,7 @@ public:
 		uint32_t value;
 	};
 
+	glm::vec3 asVec3() const;
 	glm::vec4 asVec4() const;
 
 	void operator = (const Color& other);

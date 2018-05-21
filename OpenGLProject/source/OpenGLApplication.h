@@ -8,7 +8,8 @@
 
 #include "Shader.h"
 #include "Camera.h"
-#include "Mesh.h"
+#include "Light.h"
+//#include "Mesh.h"
 #include "OBJMesh.h"
 
 // OpenGLApplication class that manages everything
@@ -43,5 +44,5 @@ private:
 	Shader m_shader;
 
 	// Mesh(es)
-	Mesh m_mesh;
+	OBJMesh m_mesh;
 };

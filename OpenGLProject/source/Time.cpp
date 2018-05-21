@@ -17,6 +17,4 @@ void Time::update()
 	m_lastFrame = m_currentFrame;
 
 	m_fps = 1.0f / m_deltaTime;
-
-	std::cout << m_fps << std::endl;
 }

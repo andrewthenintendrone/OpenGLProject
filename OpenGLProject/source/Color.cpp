@@ -24,6 +24,11 @@ Color::Color(uint32_t hexCode)
 	a = chunks[0];
 }
 
+glm::vec3 Color::asVec3() const
+{
+	return glm::vec3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
+}
+
 glm::vec4 Color::asVec4() const
 {
 	return glm::vec4((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);

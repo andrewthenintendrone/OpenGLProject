@@ -1,8 +1,8 @@
 #include "Mesh.h"
 #include <glad\glad.h>
 #include "Color.h"
-
-extern unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
+#include <experimental\filesystem>
+namespace fs = std::experimental::filesystem;
 
 Mesh::~Mesh()
 {
@@ -46,7 +46,7 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 
 	// enable second element as normal
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(glm::vec4));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)sizeof(glm::vec4));
 
 	// enable third element as texCoord
 	glEnableVertexAttribArray(2);
@@ -74,19 +74,39 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 void Mesh::initialiseQuad()
 {
 	std::vector<Vertex> verts(4);
+
+	// positions
 	verts[0].position = glm::vec4(-0.5f, 0, 0.5f, 1);
 	verts[1].position = glm::vec4(0.5f, 0, 0.5f, 1);
 	verts[2].position = glm::vec4(-0.5f, 0, -0.5f, 1);
 	verts[3].position = glm::vec4(0.5f, 0, -0.5f, 1);
 
+	// normals
+	for(int i = 0; i < 4; i++)
+	{
+		verts[i].normal = glm::vec4(0, 1, 0, 0);
+	}
+
+	// texCoords
+	verts[0].texcoord = glm::vec2(0, 0);
+	verts[1].texcoord = glm::vec2(1, 0);
+	verts[2].texcoord = glm::vec2(0, 1);
+	verts[3].texcoord = glm::vec2(1, 1);
+
+	// texture
+	Texture texture;
+	texture.load(fs::current_path().string() + "\\resources\\chess.jpg");
+
 	std::vector<unsigned int> indices{ 0, 1, 2, 2, 1, 3 };
 
-	initialise(verts, &indices);
+	initialise(verts, &indices, &texture);
 }
 
 void Mesh::initialiseBox()
 {
 	std::vector<Vertex> verts(8);
+
+	// positions
 	verts[0].position = glm::vec4(-0.5f, 0.5f, 0.5f, 1);
 	verts[1].position = glm::vec4(-0.5f, 0.5f, -0.5f, 1);
 	verts[2].position = glm::vec4(0.5f, 0.5f, -0.5f, 1);
@@ -95,6 +115,13 @@ void Mesh::initialiseBox()
 	verts[5].position = glm::vec4(-0.5f, -0.5f, -0.5f, 1);
 	verts[6].position = glm::vec4(0.5f, -0.5f, -0.5f, 1);
 	verts[7].position = glm::vec4(0.5f, -0.5f, 0.5f, 1);
+
+	// normals
+	for (int i = 0; i < 8; i++)
+	{
+		verts[i].normal = verts[i].position;
+		verts[i].normal.w = 0;
+	}
 
 	std::vector<unsigned int> indices =
 	{
@@ -112,7 +139,11 @@ void Mesh::initialiseBox()
 		7, 6, 5
 	};
 
-	initialise(verts, &indices);
+	// texture
+	Texture texture;
+	texture.load(fs::current_path().string() + "\\resources\\testTexture.png");
+
+	initialise(verts, &indices, &texture);
 }
 
 void Mesh::initialiseCircle(float radius, int segments)
@@ -234,7 +265,7 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 void Mesh::draw(Shader shader)
 {
 	// use texture
-	glUniform1i(glGetUniformLocation(shader.ID, "colorTexture"), 0);
+	glUniform1i(glGetUniformLocation(shader.ID, "diffuseTexture"), 0);
 	glBindTexture(GL_TEXTURE_2D, m_texture.id);
 
 	glBindVertexArray(vao);

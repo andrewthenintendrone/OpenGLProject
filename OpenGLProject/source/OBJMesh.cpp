@@ -30,7 +30,7 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 	std::string error = "";
 
 	std::string file = filename;
-	std::string folder = file.substr(0, file.find_last_of('\\/') + 1);
+	std::string folder = file.substr(0, file.find_last_of('\\') + 1);
 
 	bool success = tinyobj::LoadObj(shapes, materials, error, filename.c_str(), folder.c_str());
 
