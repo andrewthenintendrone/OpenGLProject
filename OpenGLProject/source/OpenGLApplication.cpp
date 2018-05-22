@@ -66,22 +66,20 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\normalmapping.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\normalmapping.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 
 	// generate mesh(es)
 	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
 
 	// set up light
-	m_light.ambient = glm::vec3(1);
-	m_light.diffuse = glm::vec3(1);
-	m_light.specular = glm::vec3(1);
+	m_light.ambient = Color::White().asVec3();
+	m_light.diffuse = Color::White().asVec3();
+	m_light.specular = Color::White().asVec3();
 
 	// set up material
 	m_material.ambient = Color::White().asVec3() * 0.25f;
 	m_material.diffuse = Color::White().asVec3();
 	m_material.specular = Color::White().asVec3();
-	m_material.emissive = Color::Splatoon2Orange().asVec3();
-	m_material.specularPower = 64.0f;
 }
 
 void OpenGLApplication::run()
@@ -117,29 +115,10 @@ void OpenGLApplication::render()
 
 	float time = glfwGetTime();
 
-	// get projection matrix
-	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
-
-	// get view matrix
-	glm::mat4 view = m_camera.GetViewMatrix();
-
-	// get model matrix
-	glm::mat4 model(1);
-	//model = glm::rotate(model, time, glm::vec3(0, 1, 0));
-	m_shader.setMat4("ModelMatrix", model);
-
-	// combine matrices
-	glm::mat4 pvm = projection * view * model;
-	m_shader.setMat4("ProjectionViewModel", pvm);
-
-	// send normal matrix
-	glm::mat3 normalMatrix = glm::inverseTranspose(model);
-	m_shader.setMat3("NormalMatrix", normalMatrix);
-
 	// update light
-	m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
-		glm::sin(time * 2), 0));
-	//m_light.direction = glm::vec3(0, 0, -1);
+	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
+		//-1, glm::sin(time * 2)));
+	m_light.direction = glm::vec3(0, 0, 1);
 	m_shader.setVec3("light.direction", m_light.direction);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
@@ -149,10 +128,31 @@ void OpenGLApplication::render()
 	m_shader.setVec3("material.ambient", m_material.ambient);
 	m_shader.setVec3("material.diffuse", m_material.diffuse);
 	m_shader.setVec3("material.specular", m_material.specular);
-	m_shader.setFloat("material.specularPower", m_material.specularPower);
+	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
+	m_shader.setFloat("material.roughness", 0.25f);
+	m_shader.setFloat("material.reflectionCoefficient", 0.75f);
+
+	// get projection matrix
+	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
+
+	// get view matrix
+	glm::mat4 view = m_camera.GetViewMatrix();
 
 	// send camera position
 	m_shader.setVec3("cameraPosition", m_camera.Position);
+
+	// get model matrix
+	glm::mat4 model(1);
+
+	m_shader.setMat4("ModelMatrix", model);
+
+	// combine matrices
+	glm::mat4 pvm = projection * view * model;
+	m_shader.setMat4("ProjectionViewModel", pvm);
+
+	// send normal matrix
+	glm::mat3 normalMatrix = glm::inverseTranspose(model);
+	m_shader.setMat3("NormalMatrix", normalMatrix);
 
 	// draw mesh
 	m_mesh.draw();

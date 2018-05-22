@@ -41,19 +41,21 @@ void main()
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
+	
+	// tangent space normals
+	vec3 N = normalize(vNormal);
+	vec3 T = normalize(vTangent);
+	vec3 B = normalize(vBiTangent);
 
+	mat3 TBN = mat3(T, B, N);
+
+	N = TBN * (normalTexture * 2 - 1);
+	
 	// ambient lightning
 	vec3 ambient = light.ambient * material.ambient * diffuseTexture;
 
 	// diffuse lighting
-	vec3 N = normalize(vNormal);
-	vec3 T = normalize(vTangent);
-	vec3 B = normalize(vBiTangent);
 	vec3 L = normalize(light.direction);
-	
-	mat3 TBN = mat3(T, B, N);
-
-	N = TBN * (normalTexture * 2 - 1);
 	
 	float lambertTerm = max(0, min(1, dot(N, -L)));
 	vec3 diffuse = light.diffuse * material.diffuse * lambertTerm * diffuseTexture;

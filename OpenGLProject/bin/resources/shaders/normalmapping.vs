@@ -22,9 +22,12 @@ uniform mat3 NormalMatrix;
 void main()
 {
 	vPosition = ModelMatrix * Position;
+	
+	// calculate TBN in vertex shader for efficiency
 	vNormal = NormalMatrix * Normal.xyz;
 	vTangent = NormalMatrix * Tangent.xyz;
 	vBiTangent = cross(vNormal, vTangent) * Tangent.w;
+	
 	vTexCoords = TexCoords;
 	gl_Position = ProjectionViewModel * Position;
 }

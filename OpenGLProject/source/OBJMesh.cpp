@@ -180,7 +180,7 @@ void OBJMesh::draw(bool usePatches)
 	int opacityUniform = glGetUniformLocation(program, "opacity");
 	int specPowUniform = glGetUniformLocation(program, "specularPower");
 
-	int alphaTexUniform = glGetUniformLocation(program, "alphaTexture");
+	int alphaTexUniform = glGetUniformLocation(program, "material.alphaTexture");
 	int ambientTexUniform = glGetUniformLocation(program, "ambientTexture");
 	int diffuseTexUniform = glGetUniformLocation(program, "material.diffuseTexture");
 	int specTexUniform = glGetUniformLocation(program, "material.specularTexture");
