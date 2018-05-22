@@ -185,7 +185,7 @@ void OBJMesh::draw(bool usePatches)
 	int diffuseTexUniform = glGetUniformLocation(program, "material.diffuseTexture");
 	int specTexUniform = glGetUniformLocation(program, "material.specularTexture");
 	int specHighlightTexUniform = glGetUniformLocation(program, "specularHighlightTexture");
-	int normalTexUniform = glGetUniformLocation(program, "normalTexture");
+	int normalTexUniform = glGetUniformLocation(program, "material.normalTexture");
 	int dispTexUniform = glGetUniformLocation(program, "displacementTexture");
 
 	// set texture slots (these don't change per material)

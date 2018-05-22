@@ -1,0 +1,15 @@
+# Blender MTL File: 'kart.blend'
+# Material Count: 1
+
+newmtl kartMat
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_bump textures\\normal.png
+map_Kd textures\\diffuse.png
+map_Ks textures\\specular.png

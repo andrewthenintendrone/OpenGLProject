@@ -66,10 +66,10 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\normalmapping.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\normalmapping.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\bunny\\bunny.obj", true, true);
+	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
 
 	// set up light
 	m_light.ambient = glm::vec3(1);
@@ -77,9 +77,10 @@ void OpenGLApplication::setup()
 	m_light.specular = glm::vec3(1);
 
 	// set up material
-	m_material.ambient = Color::MediumPurple().asVec3() * 0.25f;
-	m_material.diffuse = Color::MediumPurple().asVec3();
+	m_material.ambient = Color::White().asVec3() * 0.25f;
+	m_material.diffuse = Color::White().asVec3();
 	m_material.specular = Color::White().asVec3();
+	m_material.emissive = Color::Splatoon2Orange().asVec3();
 	m_material.specularPower = 64.0f;
 }
 
@@ -124,7 +125,7 @@ void OpenGLApplication::render()
 
 	// get model matrix
 	glm::mat4 model(1);
-	model = glm::rotate(model, time, glm::vec3(0, 1, 0));
+	//model = glm::rotate(model, time, glm::vec3(0, 1, 0));
 	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
@@ -136,9 +137,9 @@ void OpenGLApplication::render()
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
 	// update light
-	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
-		//glm::sin(time * 2), 0));
-	m_light.direction = glm::vec3(0, 0, -1);
+	m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
+		glm::sin(time * 2), 0));
+	//m_light.direction = glm::vec3(0, 0, -1);
 	m_shader.setVec3("light.direction", m_light.direction);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
