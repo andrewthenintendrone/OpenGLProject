@@ -24,7 +24,7 @@ public:
 	glm::vec2 m_lastMousePos = glm::vec2(-1, -1);
 
 		// Camera
-	Camera m_camera = Camera(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(0, 1, 0), -45, -15);
+	Camera m_camera;
 
 private:
 

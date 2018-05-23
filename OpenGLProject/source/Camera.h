@@ -7,57 +7,43 @@
 
 #include <vector>
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement
-{
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT
-};
-
-// Default camera values
-const float YAW = -90.0f;
-const float PITCH = 0.0f;
-const float SPEED = 10.0f;
-const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.0f;
-
-
-// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
+// An abstract camera class
 class Camera
 {
 public:
-	// Camera Attributes
-	glm::vec3 Position;
-	glm::vec3 Front;
-	glm::vec3 Up;
-	glm::vec3 Right;
-	glm::vec3 WorldUp;
-	// Euler Angles
-	float Yaw;
-	float Pitch;
-	// Camera options
-	float MovementSpeed;
-	float MouseSensitivity;
-	float Zoom;
 
-	bool run = false;
+	// constructors
+	Camera();
 
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
+	const glm::mat4 getProjectionMatrix();
+	const glm::mat4 GetViewMatrix();
+	const glm::mat4 getProjectionViewMatrix();
 
-	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
+	void setPosition(const glm::vec3 position);
+	void setRotation(const glm::vec3 rotation);
 
-	glm::mat4 GetViewMatrix();
-
-	void ProcessKeyboard(Camera_Movement direction);
-
-	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
-
-	void ProcessMouseScroll(float yoffset);
+	const glm::vec3 getPosition();
+	const glm::vec3 getRotation();
 
 private:
 
-	void updateCameraVectors();
+	void updateTransform();
+
+	// Camera Attributes
+	glm::vec4 m_worldPos = glm::vec4(0, 0, 0, 1); // position in world space
+	glm::vec4 m_right = glm::vec4(1, 0, 0, 1); // right vector
+	glm::vec4 m_up = glm::vec4(0, 1, 0, 1); // up vector
+	glm::vec4 m_front = glm::vec4(0, 0, 1, 1); // forward vector
+	glm::vec4 m_worldUp; // world up vector
+
+	glm::mat4 m_viewMatrix = glm::mat4(1);
+	glm::mat4 m_projectionMatrix = glm::mat4(1);
+
+	// projection properties
+	unsigned int m_screenWidth = 1280;
+	unsigned int m_screenHeight = 720;
+	float m_nearPlane = 0.1f;
+	float m_farPlane = 1000.0f;
+	float m_fieldOfView = 60.0f;
 };
 #endif

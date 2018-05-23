@@ -69,7 +69,7 @@ void OpenGLApplication::setup()
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
+	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\teapot\\teapot.obj", true, true);
 
 	// set up light
 	m_light.ambient = Color::White().asVec3();
@@ -77,9 +77,12 @@ void OpenGLApplication::setup()
 	m_light.specular = Color::White().asVec3();
 
 	// set up material
-	m_material.ambient = Color::White().asVec3() * 0.25f;
-	m_material.diffuse = Color::White().asVec3();
+	m_material.ambient = Color::HotPink().asVec3() * 0.25f;
+	m_material.diffuse = Color::HotPink().asVec3();
 	m_material.specular = Color::White().asVec3();
+
+	// set up camera
+	m_camera.setPosition(glm::vec3(0, 0, -10.0f));
 }
 
 void OpenGLApplication::run()
@@ -129,25 +132,18 @@ void OpenGLApplication::render()
 	m_shader.setVec3("material.diffuse", m_material.diffuse);
 	m_shader.setVec3("material.specular", m_material.specular);
 	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
-	m_shader.setFloat("material.roughness", 0.0f);
-	m_shader.setFloat("material.reflectionCoefficient", 1.0f);
-
-	// get projection matrix
-	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);
-
-	// get view matrix
-	glm::mat4 view = m_camera.GetViewMatrix();
+	m_shader.setFloat("material.roughness", 0.75f);
+	m_shader.setFloat("material.reflectionCoefficient", 0.5f);
 
 	// send camera position
-	m_shader.setVec3("cameraPosition", m_camera.Position);
+	m_shader.setVec3("cameraPosition", m_camera.getPosition());
 
 	// get model matrix
 	glm::mat4 model(1);
-
 	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
-	glm::mat4 pvm = projection * view * model;
+	glm::mat4 pvm = m_camera.getProjectionViewMatrix() * model;
 	m_shader.setMat4("ProjectionViewModel", pvm);
 
 	// send normal matrix
@@ -170,24 +166,24 @@ void OpenGLApplication::processInput()
 		glfwSetWindowShouldClose(m_window, true);
 
 	// left shift enables faster camera movement
-	if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT))
-		m_camera.run = true;
-	else
-		m_camera.run = false;
+	// if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT))
+		// m_camera.run = true;
+		// else
+		// m_camera.run = false;
 
 	// move camera with WASD / arrow keys
 	if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS
 		|| glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-		m_camera.ProcessKeyboard(FORWARD);
+		// m_camera.ProcessKeyboard(FORWARD);
 	if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS
 		|| glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		m_camera.ProcessKeyboard(BACKWARD);
+		// m_camera.ProcessKeyboard(BACKWARD);
 	if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS
 		|| glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		m_camera.ProcessKeyboard(LEFT);
+		// m_camera.ProcessKeyboard(LEFT);
 	if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS
 		|| glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		m_camera.ProcessKeyboard(RIGHT);
+		// m_camera.ProcessKeyboard(RIGHT);
 
 	// draw in wireframe if space is held
 	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -222,7 +218,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	app->m_lastMousePos = glm::vec2(xpos, ypos);
 
 	// send mouse movement to the camera
-	app->m_camera.ProcessMouseMovement(xoffset, yoffset);
+	// app->m_camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // whenever the mouse wheel is scrolled this callback is run
@@ -232,7 +228,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	OpenGLApplication* app = static_cast<OpenGLApplication*>(glfwGetWindowUserPointer(window));
 
 	// send scroll to the camera
-	app->m_camera.ProcessMouseScroll(yoffset);
+	// app->m_camera.ProcessMouseScroll(yoffset);
 }
 
 // whenever the window is resized this callback is run
