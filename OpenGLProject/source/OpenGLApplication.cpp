@@ -69,7 +69,7 @@ void OpenGLApplication::setup()
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
+	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
 
 	// set up light
 	m_light.ambient = Color::White().asVec3();
@@ -118,7 +118,7 @@ void OpenGLApplication::render()
 	// update light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
 		//-1, glm::sin(time * 2)));
-	m_light.direction = glm::vec3(0, 0, 1);
+	m_light.direction = glm::vec3(0, 0, -1);
 	m_shader.setVec3("light.direction", m_light.direction);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
@@ -129,8 +129,8 @@ void OpenGLApplication::render()
 	m_shader.setVec3("material.diffuse", m_material.diffuse);
 	m_shader.setVec3("material.specular", m_material.specular);
 	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
-	m_shader.setFloat("material.roughness", 0.25f);
-	m_shader.setFloat("material.reflectionCoefficient", 0.75f);
+	m_shader.setFloat("material.roughness", 0.0f);
+	m_shader.setFloat("material.reflectionCoefficient", 1.0f);
 
 	// get projection matrix
 	glm::mat4 projection = glm::perspective(glm::radians(m_camera.Zoom), (float)m_windowWidth / (float)m_windowHeight, 0.1f, 1000.0f);

@@ -63,8 +63,8 @@ void main()
 	float R2 = pow(material.roughness, 2.0);
 
 	// Oren-Nayar Diffuse Term
-	float a = 1.0 - 0.5 * R2 / (R2 + 0.33);
-	float b = 0.45 * R2 / (R2 + 0.09);
+	float A = 1.0 - 0.5 * R2 / (R2 + 0.33);
+	float B = 0.45 * R2 / (R2 + 0.09);
 
 	// CX = Max(0, cos(l, e))
 	vec3 lightProjected = normalize(L - N * NdL);
@@ -77,7 +77,7 @@ void main()
 	float DX = alpha * beta;
 
 	// Calculate Oren-Nayar, replaces the Phong Lambert Term
-	float OrenNayar = NdL * (a + b * CX * DX);
+	float OrenNayar = NdL * (A + B * CX * DX);
 
 	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar * diffuseTexture;
 
