@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
-#include "Camera.h"
+#include "FlyCamera.h"
 #include "Light.h"
 //#include "Mesh.h"
 #include "OBJMesh.h"
@@ -23,8 +23,8 @@ public:
 	// mouse info
 	glm::vec2 m_lastMousePos = glm::vec2(-1, -1);
 
-		// Camera
-	Camera m_camera;
+	// Camera
+	FlyCamera m_camera;
 
 private:
 

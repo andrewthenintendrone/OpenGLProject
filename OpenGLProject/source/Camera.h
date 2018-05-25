@@ -13,29 +13,26 @@ class Camera
 public:
 
 	// constructors
-	Camera();
+	Camera() { updateTransform(); }
 
 	const glm::mat4 getProjectionMatrix();
 	const glm::mat4 GetViewMatrix();
 	const glm::mat4 getProjectionViewMatrix();
 
 	void setPosition(const glm::vec3 position);
-	void setRotation(const glm::vec3 rotation);
+	void setLookAt(const glm::vec3 lookAt);
 
-	const glm::vec3 getPosition();
-	const glm::vec3 getRotation();
+	const glm::vec3 getPosition() { return m_position; }
 
-private:
+protected:
 
 	void updateTransform();
 
 	// Camera Attributes
-	glm::vec4 m_worldPos = glm::vec4(0, 0, 0, 1); // position in world space
-	glm::vec4 m_right = glm::vec4(1, 0, 0, 1); // right vector
-	glm::vec4 m_up = glm::vec4(0, 1, 0, 1); // up vector
-	glm::vec4 m_front = glm::vec4(0, 0, 1, 1); // forward vector
-	glm::vec4 m_worldUp; // world up vector
+	glm::vec3 m_position = glm::vec4(0, 0, 0, 1); // position in world space
+	glm::vec3 m_targetPosition = glm::vec3(0); // position to look at in world space
 
+	// current view and projection matrices
 	glm::mat4 m_viewMatrix = glm::mat4(1);
 	glm::mat4 m_projectionMatrix = glm::mat4(1);
 
@@ -44,6 +41,6 @@ private:
 	unsigned int m_screenHeight = 720;
 	float m_nearPlane = 0.1f;
 	float m_farPlane = 1000.0f;
-	float m_fieldOfView = 60.0f;
+	float m_fieldOfView = 45.0f;
 };
 #endif

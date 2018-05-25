@@ -8,6 +8,7 @@ namespace fs = std::experimental::filesystem;
 
 #include "Time.h"
 #include "Color.h"
+#include "Input.h"
 
 // callback functions
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -59,6 +60,9 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	// enable front face culling
 	glEnable(GL_CULL_FACE);
 
+	// set Input window pointer
+	Input::getInstance().setWindowPointer(m_window);
+
 	// move on to setup
 	setup();
 }
@@ -69,7 +73,7 @@ void OpenGLApplication::setup()
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\teapot\\teapot.obj", true, true);
+	m_mesh.load((fs::current_path().string() + "\\resources\\objects\\teapot\\teapot.obj"), true, true);
 
 	// set up light
 	m_light.ambient = Color::White().asVec3();
@@ -77,12 +81,11 @@ void OpenGLApplication::setup()
 	m_light.specular = Color::White().asVec3();
 
 	// set up material
-	m_material.ambient = Color::HotPink().asVec3() * 0.25f;
-	m_material.diffuse = Color::HotPink().asVec3();
+	m_material.ambient = Color::Red().asVec3() * 0.25f;
+	m_material.diffuse = Color::Red().asVec3();
 	m_material.specular = Color::White().asVec3();
 
-	// set up camera
-	m_camera.setPosition(glm::vec3(0, 0, -10.0f));
+	m_camera.setPosition(glm::vec3(-10, 10, 10));
 }
 
 void OpenGLApplication::run()
@@ -119,9 +122,9 @@ void OpenGLApplication::render()
 	float time = glfwGetTime();
 
 	// update light
-	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
-		//-1, glm::sin(time * 2)));
-	m_light.direction = glm::vec3(0, 0, -1);
+	m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
+		-1, glm::sin(time * 2)));
+	//m_light.direction = glm::vec3(0, 0, -1);
 	m_shader.setVec3("light.direction", m_light.direction);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
@@ -150,7 +153,6 @@ void OpenGLApplication::render()
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
-	// draw mesh
 	m_mesh.draw();
 
 	// swap buffers and poll window events
@@ -161,32 +163,31 @@ void OpenGLApplication::render()
 // handle any input that has occured
 void OpenGLApplication::processInput()
 {
-	// escape quits the application
-	if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	// update Input
+	Input::getInstance().update();
+
+	// escape exits
+	if (Input::getInstance().getPressed(GLFW_KEY_ESCAPE))
 		glfwSetWindowShouldClose(m_window, true);
 
 	// left shift enables faster camera movement
-	// if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT))
-		// m_camera.run = true;
-		// else
-		// m_camera.run = false;
+	if (Input::getInstance().getHeld(GLFW_KEY_LEFT_SHIFT))
+	 m_camera.m_running = true;
+	 else
+	 m_camera.m_running = false;
 
 	// move camera with WASD / arrow keys
-	if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS
-		|| glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-		// m_camera.ProcessKeyboard(FORWARD);
-	if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS
-		|| glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		// m_camera.ProcessKeyboard(BACKWARD);
-	if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS
-		|| glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		// m_camera.ProcessKeyboard(LEFT);
-	if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS
-		|| glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		// m_camera.ProcessKeyboard(RIGHT);
+	if (Input::getInstance().getHeld(GLFW_KEY_W) || Input::getInstance().getHeld(GLFW_KEY_UP))
+		m_camera.processKeyboard(FORWARD);
+	if (Input::getInstance().getHeld(GLFW_KEY_S) || Input::getInstance().getHeld(GLFW_KEY_DOWN))
+		m_camera.processKeyboard(BACKWARD);
+	if (Input::getInstance().getHeld(GLFW_KEY_A) || Input::getInstance().getHeld(GLFW_KEY_LEFT))
+		m_camera.processKeyboard(LEFT);
+	if (Input::getInstance().getHeld(GLFW_KEY_D) || Input::getInstance().getHeld(GLFW_KEY_RIGHT))
+		m_camera.processKeyboard(RIGHT);
 
 	// draw in wireframe if space is held
-	if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	if (Input::getInstance().getHeld(GLFW_KEY_SPACE))
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -218,7 +219,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	app->m_lastMousePos = glm::vec2(xpos, ypos);
 
 	// send mouse movement to the camera
-	// app->m_camera.ProcessMouseMovement(xoffset, yoffset);
+	app->m_camera.processMouseMovement(xoffset, yoffset);
 }
 
 // whenever the mouse wheel is scrolled this callback is run

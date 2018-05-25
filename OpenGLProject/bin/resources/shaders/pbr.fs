@@ -27,10 +27,10 @@ struct Material
 	float roughness;
 	float reflectionCoefficient;
 
-	sampler2D diffuseTexture;
-	sampler2D specularTexture;
-	sampler2D normalTexture;
-	sampler2D alphaTexture;
+	//sampler2D diffuseTexture;
+	//sampler2D specularTexture;
+	//sampler2D normalTexture;
+	//sampler2D alphaTexture;
 };
 uniform Material material;
 
@@ -41,20 +41,19 @@ out vec4 FragColor;
 void main()
 {
 	// sample textures
-	// vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
-	// vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
-	// vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
-	// vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
+	//vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
+	//vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
+	//vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
+	//vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
 	
 	// tangent space normals
-	// vec3 N = TBN * (normalTexture * 2 - 1);
+	//vec3 N = TBN * (normalTexture * 2 - 1);
 	vec3 N = TBN[2];
 	vec3 L = normalize(-light.direction);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
 
 	// ambient lightning
-	// vec3 ambient = light.ambient * material.ambient * diffuseTexture;
 	vec3 ambient = light.ambient * material.ambient;
 
 	// diffuse lighting
@@ -81,7 +80,6 @@ void main()
 	// Calculate Oren-Nayar, replaces the Phong Lambert Term
 	float OrenNayar = NdL * (A + B * CX * DX);
 
-	// vec3 diffuse = light.diffuse * material.diffuse * OrenNayar * diffuseTexture;
 	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar;
 
 	// specular lighting
@@ -102,10 +100,8 @@ void main()
 	// Calculate Cook-Torrance
 	float CookTorrance = max((D * G * F) / (NdE * pi), 0.0);
 
-	// vec3 specular = light.specular * material.specular * CookTorrance * specularTexture;
 	vec3 specular = light.specular * material.specular * CookTorrance;
 
 	// output final color
-	//FragColor = vec4(ambient + diffuse + specular + alphaTexture, 1);
 	FragColor = vec4(ambient + diffuse + specular, 1);
 }
