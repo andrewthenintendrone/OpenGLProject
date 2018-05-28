@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Color.cpp" />
+    <ClCompile Include="source\Cubemap.cpp" />
     <ClCompile Include="source\FlyCamera.cpp" />
     <ClCompile Include="source\glad.c" />
     <ClCompile Include="source\Input.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="source\Array2D.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\Color.h" />
+    <ClInclude Include="source\Cubemap.h" />
     <ClInclude Include="source\FlyCamera.h" />
     <ClInclude Include="source\Input.h" />
     <ClInclude Include="source\Light.h" />
