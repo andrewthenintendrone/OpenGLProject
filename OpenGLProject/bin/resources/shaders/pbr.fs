@@ -54,7 +54,7 @@ void main()
 	vec3 H = normalize(L + E);
 
 	// ambient lightning
-	vec3 ambient = light.ambient * material.ambient * diffuseTexture;
+	vec3 ambient = light.ambient * material.ambient;
 
 	// diffuse lighting
 
@@ -80,7 +80,7 @@ void main()
 	// Calculate Oren-Nayar, replaces the Phong Lambert Term
 	float OrenNayar = NdL * (A + B * CX * DX);
 
-	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar * diffuseTexture;
+	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar;
 
 	// specular lighting
 	float NdH = max(0, dot(N, H));
@@ -100,7 +100,13 @@ void main()
 	// Calculate Cook-Torrance
 	float CookTorrance = max((D * G * F) / (NdE * pi), 0.0);
 
-	vec3 specular = light.specular * material.specular * CookTorrance * (1.0 - specularTexture.r);
+	vec3 specular = light.specular * material.specular * CookTorrance;
+
+
+	// multiply by textures
+	ambient *= diffuseTexture;
+	diffuse *= diffuseTexture;
+	specular *= specularTexture;
 
 	// output final color
 	FragColor = vec4(ambient + diffuse + specular, 1);

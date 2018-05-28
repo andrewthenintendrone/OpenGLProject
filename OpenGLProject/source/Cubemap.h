@@ -4,7 +4,12 @@
 
 class Cubemap
 {
+public:
 	unsigned int id = 0;
 
-	void load(const std::vector<std::string>& filenames);
+	void load(std::vector<std::string> filenames);
+
+private:
+
+	std::vector<std::string> m_filenames;
 };

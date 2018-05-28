@@ -22,8 +22,8 @@ void main()
 	vPosition = ModelMatrix * Position;
 	
 	// calculate TBN in vertex shader for efficiency
-	vec3 N = NormalMatrix * Normal.xyz;
-	vec3 T = NormalMatrix * Tangent.xyz;
+	vec3 N = normalize(NormalMatrix * Normal.xyz);
+	vec3 T = normalize(NormalMatrix * Tangent.xyz);
 	vec3 B = cross(N, T) * Tangent.w;
 
 	TBN = mat3(T, B, N);

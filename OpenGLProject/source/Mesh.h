@@ -21,6 +21,10 @@ public:
 
 	virtual void draw(Shader shader);
 
+	const unsigned int getVertexArrayObject() { return vao; }
+	const unsigned int getVertexBufferObject() { return vbo; }
+	const unsigned int getIndexBufferObject() { return ibo; }
+
 protected:
 
 	unsigned int vao, vbo, ibo;

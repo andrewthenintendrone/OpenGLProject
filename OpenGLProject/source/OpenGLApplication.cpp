@@ -72,9 +72,21 @@ void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
+	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
+
+	// load skybox textures
+	std::vector<std::string> skyboxTextures;
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\right.jpg");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\left.jpg");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\top.jpg");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\bottom.jpg");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\front.jpg");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\skybox\\back.jpg");
+	m_cubemap.load(skyboxTextures);
 
 	// generate mesh(es)
-	m_mesh.initialiseSphere(10.0f, 32, 64);
+	m_mesh.load("C:\\Users\\Andrew\\Documents\\3d modeling\\pokemon\\Dragonite\\Dragonite.obj", true, true);
+	m_skybox.initialiseBox();
 
 	// set up light
 	m_light.ambient = Color::White().asVec3();
@@ -117,15 +129,23 @@ void OpenGLApplication::render()
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glDepthMask(GL_FALSE);
+	m_skyShader.use();
+	m_skyShader.setMat4("view", glm::mat4(glm::mat3(m_camera.GetViewMatrix())));
+	m_skyShader.setMat4("projection", m_camera.getProjectionMatrix());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap.id);
+	m_skybox.draw(m_skyShader);
+	glDepthMask(GL_TRUE);
+
 	// enable shader
 	m_shader.use();
 
 	float time = glfwGetTime();
 
 	// update light
-	m_light.position = glm::vec3(glm::cos(time * 2) * 10,
-		10, glm::sin(time * 2) * 10);
-	//m_light.direction = glm::vec3(0, 0, -1);
+	//m_light.position = glm::vec3(glm::cos(time * 2) * 10,
+		//10, glm::sin(time * 2) * 10);
+	m_light.position = glm::vec3(0, 100, 0);
 	m_shader.setVec3("light.position", m_light.position);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
@@ -136,14 +156,16 @@ void OpenGLApplication::render()
 	m_shader.setVec3("material.diffuse", m_material.diffuse);
 	m_shader.setVec3("material.specular", m_material.specular);
 	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
-	m_shader.setFloat("material.roughness", 0.75f);
-	m_shader.setFloat("material.reflectionCoefficient", 0.25f);
+	m_shader.setFloat("material.roughness", 0.5f);
+	m_shader.setFloat("material.reflectionCoefficient", 0.75f);
 
 	// send camera position
 	m_shader.setVec3("cameraPosition", m_camera.getPosition());
 
 	// get model matrix
 	glm::mat4 model(1);
+	model = glm::scale(model, glm::vec3(0.1f));
+	model = glm::rotate(model, time * 3, glm::vec3(1.0f, 0, 0));
 	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
@@ -154,7 +176,7 @@ void OpenGLApplication::render()
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
-	m_mesh.draw(m_shader);
+	m_mesh.draw();
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

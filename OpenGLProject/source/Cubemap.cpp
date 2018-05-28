@@ -4,19 +4,37 @@
 #include <glad\glad.h>
 #include <stb\stb_image.h>
 
-void Cubemap::load(const std::vector<std::string>& filenames)
+void Cubemap::load(std::vector<std::string> filenames)
 {
+	// don't try to load if this cubemap is already initialised
 	assert(id == 0);
 
+	if (filenames.size() != 6)
+	{
+		std::cout << "Cubemap must use 6 textures\n";
+		return;
+	}
+
+	// store filenames
+	m_filenames = filenames;
+
+	// generate textures
 	glGenTextures(1, &id);
 
+	// bind the cube map
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 
+	// create variables for texture size and format
 	int width, height, channels;
-	for (unsigned int i = 0; i < filenames.size(); i++)
-	{
-		unsigned char* data = stbi_load(filenames[i].c_str(), &width, &height, &channels, 0);
+	unsigned char* data;
 
+	// for each texture
+	for (GLuint i = 0; i < filenames.size(); i++)
+	{
+		// attempt to read texture
+		data = stbi_load(filenames[i].c_str(), &width, &height, &channels, 0);
+
+		// if data was read succesfully
 		if (data)
 		{
 			std::cout << "Loaded texture from " << filenames[i] << std::endl;
@@ -42,8 +60,10 @@ void Cubemap::load(const std::vector<std::string>& filenames)
 				break;
 			}
 
+			// transfer texture data to gpu
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
+			// free image data (it is already on the GPU)
 			stbi_image_free(data);
 		}
 		else
@@ -53,9 +73,12 @@ void Cubemap::load(const std::vector<std::string>& filenames)
 		}
 	}
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// enable texture filtering
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTextureParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTextureParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// enable texture clamp
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }

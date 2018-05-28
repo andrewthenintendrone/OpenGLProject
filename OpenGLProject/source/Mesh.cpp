@@ -320,12 +320,8 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 
 void Mesh::draw(Shader shader)
 {
-	// use texture
-	shader.setInt("material.diffuseTexture", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture.id);
-
 	glBindVertexArray(vao);
+
 	// using indices or just vertices
 	if (ibo != 0)
 	{
