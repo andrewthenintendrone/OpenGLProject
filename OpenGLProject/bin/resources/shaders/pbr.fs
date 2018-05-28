@@ -10,7 +10,7 @@ in vec2 vTexCoords;
 
 struct Light
 {
-	vec3 direction;
+	vec3 position;
 	
 	vec3 ambient;
 	vec3 diffuse;
@@ -27,8 +27,8 @@ struct Material
 	float roughness;
 	float reflectionCoefficient;
 
-	//sampler2D diffuseTexture;
-	//sampler2D specularTexture;
+	sampler2D diffuseTexture;
+	sampler2D specularTexture;
 	//sampler2D normalTexture;
 	//sampler2D alphaTexture;
 };
@@ -41,20 +41,20 @@ out vec4 FragColor;
 void main()
 {
 	// sample textures
-	//vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
-	//vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
+	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
+	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	//vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 	//vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
 	
 	// tangent space normals
 	//vec3 N = TBN * (normalTexture * 2 - 1);
 	vec3 N = TBN[2];
-	vec3 L = normalize(-light.direction);
+	vec3 L = normalize(light.position - vPosition.xyz);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
 
 	// ambient lightning
-	vec3 ambient = light.ambient * material.ambient;
+	vec3 ambient = light.ambient * material.ambient * diffuseTexture;
 
 	// diffuse lighting
 
@@ -80,7 +80,7 @@ void main()
 	// Calculate Oren-Nayar, replaces the Phong Lambert Term
 	float OrenNayar = NdL * (A + B * CX * DX);
 
-	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar;
+	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar * diffuseTexture;
 
 	// specular lighting
 	float NdH = max(0, dot(N, H));
@@ -100,7 +100,7 @@ void main()
 	// Calculate Cook-Torrance
 	float CookTorrance = max((D * G * F) / (NdE * pi), 0.0);
 
-	vec3 specular = light.specular * material.specular * CookTorrance;
+	vec3 specular = light.specular * material.specular * CookTorrance * (1.0 - specularTexture.r);
 
 	// output final color
 	FragColor = vec4(ambient + diffuse + specular, 1);

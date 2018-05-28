@@ -17,6 +17,7 @@ public:
 	void initialiseBox();
 	void initialiseCircle(float radius, int segments);
 	void initialiseCylinder(float radius, float height, int segments);
+	void initialiseSphere(float radius, int rows, int columns);
 
 	virtual void draw(Shader shader);
 

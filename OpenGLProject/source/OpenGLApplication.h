@@ -9,7 +9,7 @@
 #include "Shader.h"
 #include "FlyCamera.h"
 #include "Light.h"
-//#include "Mesh.h"
+#include "Mesh.h"
 #include "OBJMesh.h"
 
 // OpenGLApplication class that manages everything
@@ -42,13 +42,15 @@ private:
 
 	// Shader(s)
 	Shader m_shader;
+	//Shader m_lightShader;
 
 	// Light(s)
-	Light m_light;
+	PointLight m_light;
 
 	// Material(s)
 	Material m_material;
 
 	// Mesh(es)
-	OBJMesh m_mesh;
+	Mesh m_mesh;
+	//OBJMesh m_mesh;
 };

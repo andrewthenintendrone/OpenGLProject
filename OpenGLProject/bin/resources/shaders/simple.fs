@@ -3,9 +3,13 @@
 
 out vec4 FragColor;
 
-uniform vec3 Kd = vec3(1, 0, 1);
+in vec2 vTexCoords;
+
+uniform sampler2D diffuseTexture;
+
+uniform vec3 color = vec3(1, 0, 1);
 
 void main()
 {	
-	FragColor = vec4(Kd, 1);
+	FragColor = texture(diffuseTexture, vTexCoords);
 }

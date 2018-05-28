@@ -1,8 +1,15 @@
 #include "Mesh.h"
 #include <glad\glad.h>
+#include <math.h>
 #include "Color.h"
 #include <experimental\filesystem>
 namespace fs = std::experimental::filesystem;
+
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+
+#include <glm\gtc\constants.hpp>
 
 Mesh::~Mesh()
 {
@@ -139,11 +146,7 @@ void Mesh::initialiseBox()
 		7, 6, 5
 	};
 
-	// texture
-	Texture texture;
-	texture.load(fs::current_path().string() + "\\resources\\testTexture.png");
-
-	initialise(verts, &indices, &texture);
+	initialise(verts, &indices);
 }
 
 void Mesh::initialiseCircle(float radius, int segments)
@@ -152,7 +155,7 @@ void Mesh::initialiseCircle(float radius, int segments)
 	std::vector<unsigned int> indices;
 
 	// create circle verts / indices
-	for (int i = 0; i < segments + 1; i++)
+	for (int i = 0; i <= segments; i++)
 	{
 		Vertex currentVertex;
 
@@ -167,10 +170,10 @@ void Mesh::initialiseCircle(float radius, int segments)
 		// place vert correctly
 		float angle = glm::radians(i / (float)segments * 360.0f);
 
-		currentVertex.position.x = std::cos(angle) * radius;
-		currentVertex.position.z = std::sin(angle) * radius;
+		currentVertex.position.x = std::sin(angle) * radius;
+		currentVertex.position.z = std::cos(angle) * radius;
 
-		currentVertex.texcoord = glm::vec2(std::cos(angle) * 0.5f + 0.5f, std::sin(angle) * 0.5f + 0.5f);
+		currentVertex.texcoord = glm::vec2(std::sin(angle) * 0.5f + 0.5f, std::cos(angle) * 0.5f + 0.5f);
 
 		verts.push_back(currentVertex);
 
@@ -180,7 +183,7 @@ void Mesh::initialiseCircle(float radius, int segments)
 		indices.push_back(i % segments + 1);
 	}
 
-	initialise(verts, &indices);
+	initialise(verts);
 }
 
 void Mesh::initialiseCylinder(float radius, float height, int segments)
@@ -189,7 +192,7 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 	std::vector<unsigned int> indices;
 
 	// create top circle verts / indices
-	for (int i = 0; i < segments + 1; i++)
+	for (int i = 0; i <= segments; i++)
 	{
 		Vertex currentVertex;
 		currentVertex.position = glm::vec4(0, height * 0.5f, 0, 1);
@@ -205,20 +208,20 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 		// place vert correctly
 		float angle = glm::radians(i / (float)segments * 360.0f);
 
-		currentVertex.position.x = std::cos(angle) * radius;
-		currentVertex.position.z = std::sin(angle) * radius;
+		currentVertex.position.x = std::sin(angle) * radius;
+		currentVertex.position.z = std::cos(angle) * radius;
 
-		currentVertex.texcoord = glm::vec2(std::cos(angle) * 0.5f + 0.5f, std::sin(angle) * 0.5f + 0.5f);
+		currentVertex.texcoord = glm::vec2(std::sin(angle) * 0.5f + 0.5f, std::cos(angle) * 0.5f + 0.5f);
 
 		verts.push_back(currentVertex);
 
 		// add indices
-		indices.push_back(i % segments + 1);
-		indices.push_back(i);
 		indices.push_back(0);
+		indices.push_back(i);
+		indices.push_back(i % segments + 1);
 	}
 	// create bottom circle verts / indices
-	for (int i = 0; i < segments + 1; i++)
+	for (int i = 0; i <= segments; i++)
 	{
 		Vertex currentVertex;
 		currentVertex.position = glm::vec4(0, -height * 0.5f, 0, 1);
@@ -234,29 +237,82 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 		// place vert correctly
 		float angle = glm::radians(i / (float)segments * 360.0f);
 
-		currentVertex.position.x = std::cos(angle) * radius;
-		currentVertex.position.z = std::sin(angle) * radius;
+		currentVertex.position.x = std::sin(angle) * radius;
+		currentVertex.position.z = std::cos(angle) * radius;
 
-		currentVertex.texcoord = glm::vec2(std::cos(angle) * 0.5f + 0.5f, std::sin(angle) * 0.5f + 0.5f);
+		currentVertex.texcoord = glm::vec2(std::sin(angle) * 0.5f + 0.5f, std::cos(angle) * 0.5f + 0.5f);
 
 		verts.push_back(currentVertex);
 
 		// add indices
-		indices.push_back(segments + 1);
-		indices.push_back(i + segments + 1);
 		indices.push_back(i % segments + segments + 2);
+		indices.push_back(i + segments + 1);
+		indices.push_back(segments + 1);
 	}
 
 	// create outer indices
-	for (int i = 1; i < segments + 1; i++)
+	for (int i = 1; i <= segments; i++)
 	{
+		indices.push_back(i + segments + 1);
+		indices.push_back(i % segments + 1);
 		indices.push_back(i);
-		indices.push_back(i % segments + 1);
-		indices.push_back(i + segments + 1);
 
-		indices.push_back(i % segments + 1);
-		indices.push_back(i % segments + segments + 2);
 		indices.push_back(i + segments + 1);
+		indices.push_back(i % segments + segments + 2);
+		indices.push_back(i % segments + 1);
+	}
+
+	initialise(verts, &indices);
+}
+
+void Mesh::initialiseSphere(float radius, int rows, int columns)
+{
+	float invRadius = 1.0f / radius;
+	float invColumns = 1.0f / columns;
+	float invRows = 1.0f / rows;
+
+	std::vector<Vertex> verts;
+	//verts.resize(rows * columns + columns);
+	std::vector<unsigned int> indices;
+
+	// for each row of the mesh
+	for (int row = 0; row <= rows; row++)
+	{
+		float xRatio = float(row) * invRows;
+		float xRadians = glm::radians(xRatio * 180.0f - 90.0f);
+		float y = radius * sin(xRadians);
+		float z = radius * cos(xRadians);
+
+		// for each row of the mesh
+		for (int col = 0; col <= columns; col++)
+		{
+			float yRatio = float(col) * invColumns;
+			float theta = glm::radians(yRatio * 360.0f);
+			glm::vec3 v4Point(-z * sinf(theta), y, -z * cosf(theta));
+			glm::vec3 v4Normal(invRadius * v4Point);
+
+			// create vertex
+			Vertex v;
+			v.position = glm::vec4(v4Point, 1);
+			v.normal = glm::vec4(v4Normal, 1);
+			v.texcoord = glm::vec2(yRatio, -xRatio);
+
+			//verts[index] = v;
+			verts.push_back(v);
+		}
+	}
+
+	for (int i = 0; i < verts.size() - columns - 1; i++)
+	{
+		int i2 = i + 1;
+
+		indices.push_back(i2 + columns);
+		indices.push_back(i);
+		indices.push_back(i2);
+
+		indices.push_back(i2 + columns);
+		indices.push_back(i + columns);
+		indices.push_back(i);
 	}
 
 	initialise(verts, &indices);
@@ -265,7 +321,8 @@ void Mesh::initialiseCylinder(float radius, float height, int segments)
 void Mesh::draw(Shader shader)
 {
 	// use texture
-	glUniform1i(glGetUniformLocation(shader.ID, "diffuseTexture"), 0);
+	shader.setInt("material.diffuseTexture", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture.id);
 
 	glBindVertexArray(vao);
@@ -277,6 +334,6 @@ void Mesh::draw(Shader shader)
 	}
 	else
 	{
-		glDrawArrays(GL_TRIANGLES, 0, m_verts.size());
+		glDrawArrays(GL_PATCHES, 0, m_verts.size());
 	}
 }

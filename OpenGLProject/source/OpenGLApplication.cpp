@@ -59,6 +59,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	glEnable(GL_DEPTH_TEST);
 	// enable front face culling
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	// set Input window pointer
 	Input::getInstance().setWindowPointer(m_window);
@@ -73,7 +74,7 @@ void OpenGLApplication::setup()
 	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load((fs::current_path().string() + "\\resources\\objects\\teapot\\teapot.obj"), true, true);
+	m_mesh.initialiseSphere(10.0f, 32, 64);
 
 	// set up light
 	m_light.ambient = Color::White().asVec3();
@@ -81,8 +82,8 @@ void OpenGLApplication::setup()
 	m_light.specular = Color::White().asVec3();
 
 	// set up material
-	m_material.ambient = Color::Red().asVec3() * 0.25f;
-	m_material.diffuse = Color::Red().asVec3();
+	m_material.ambient = Color::White().asVec3() * 0.25f;
+	m_material.diffuse = Color::White().asVec3();
 	m_material.specular = Color::White().asVec3();
 
 	m_camera.setPosition(glm::vec3(-10, 10, 10));
@@ -122,10 +123,10 @@ void OpenGLApplication::render()
 	float time = glfwGetTime();
 
 	// update light
-	m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2),
-		-1, glm::sin(time * 2)));
+	m_light.position = glm::vec3(glm::cos(time * 2) * 10,
+		10, glm::sin(time * 2) * 10);
 	//m_light.direction = glm::vec3(0, 0, -1);
-	m_shader.setVec3("light.direction", m_light.direction);
+	m_shader.setVec3("light.position", m_light.position);
 	m_shader.setVec3("light.ambient", m_light.ambient);
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
 	m_shader.setVec3("light.specular", m_light.specular);
@@ -136,7 +137,7 @@ void OpenGLApplication::render()
 	m_shader.setVec3("material.specular", m_material.specular);
 	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
 	m_shader.setFloat("material.roughness", 0.75f);
-	m_shader.setFloat("material.reflectionCoefficient", 0.5f);
+	m_shader.setFloat("material.reflectionCoefficient", 0.25f);
 
 	// send camera position
 	m_shader.setVec3("cameraPosition", m_camera.getPosition());
@@ -153,7 +154,7 @@ void OpenGLApplication::render()
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
-	m_mesh.draw();
+	m_mesh.draw(m_shader);
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

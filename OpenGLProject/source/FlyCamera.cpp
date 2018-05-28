@@ -68,4 +68,5 @@ void FlyCamera::updateTransform()
 	m_up = glm::normalize(glm::cross(m_right, m_front));
 
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
+	m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), (float)m_screenWidth / (float)m_screenHeight, m_nearPlane, m_farPlane);
 }
