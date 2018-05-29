@@ -25,29 +25,35 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 		return false;
 	}
 
+	// create vectors of tinyobj formats
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string error = "";
 
+	// get file and folder name
 	std::string file = filename;
 	std::string folder = file.substr(0, file.find_last_of('\\') + 1);
 
+	// attempt to load model using tinyobj
 	bool success = tinyobj::LoadObj(shapes, materials, error, filename.c_str(), folder.c_str());
 
+	// check for errors
 	if (success == false)
 	{
 		printf("%s\n", error.c_str());
 		return false;
 	}
 
+	// store filename
 	m_filename = filename;
 
-	// copy materials
+	// resize internal material array
 	m_materials.resize(materials.size());
+
 	int index = 0;
 	for (auto& m : materials)
 	{
-
+		// get constant values from material
 		m_materials[index].ambient = glm::vec3(m.ambient[0], m.ambient[1], m.ambient[2]);
 		m_materials[index].diffuse = glm::vec3(m.diffuse[0], m.diffuse[1], m.diffuse[2]);
 		m_materials[index].specular = glm::vec3(m.specular[0], m.specular[1], m.specular[2]);
@@ -55,19 +61,15 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 		m_materials[index].specularPower = m.shininess;
 		m_materials[index].opacity = m.dissolve;
 
-		// textures
-		m_materials[index].alphaTexture.load((folder + m.alpha_texname).c_str());
-		m_materials[index].ambientTexture.load((folder + m.ambient_texname).c_str());
+		// load material textures
 		m_materials[index].diffuseTexture.load((folder + m.diffuse_texname).c_str());
 		m_materials[index].specularTexture.load((folder + m.specular_texname).c_str());
-		m_materials[index].specularHighlightTexture.load((folder + m.specular_highlight_texname).c_str());
 		m_materials[index].normalTexture.load((folder + m.bump_texname).c_str());
-		m_materials[index].displacementTexture.load((folder + m.displacement_texname).c_str());
 
 		index++;
 	}
 
-	// copy shapes
+	// allocate memory for mesh chunks
 	m_meshChunks.reserve(shapes.size());
 	for (auto& s : shapes)
 	{
@@ -131,19 +133,23 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 
 		// enable first element as positions
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
-		// enable normals
+		// enable second element as normals
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 1));
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-		// enable texture coords
+		// enable third element as texture coords
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 2));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
 
-		// enable tangents
+		// enable forth element as tangents
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 2 + sizeof(glm::vec2)));
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+
+		// enable fifth element as colors
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
 		// bind 0 for safety
 		glBindVertexArray(0);
@@ -173,36 +179,27 @@ void OBJMesh::draw(bool usePatches)
 	}
 
 	// pull uniforms from the shader
-	int kaUniform = glGetUniformLocation(program, "Ka");
-	int kdUniform = glGetUniformLocation(program, "Kd");
-	int ksUniform = glGetUniformLocation(program, "Ks");
-	int keUniform = glGetUniformLocation(program, "Ke");
+	int kaUniform = glGetUniformLocation(program, "material.ambient");
+	int kdUniform = glGetUniformLocation(program, "material.diffuse");
+	int ksUniform = glGetUniformLocation(program, "material.specular");
+	int keUniform = glGetUniformLocation(program, "material.emissive");
 	int opacityUniform = glGetUniformLocation(program, "opacity");
-	int specPowUniform = glGetUniformLocation(program, "specularPower");
+	int specPowUniform = glGetUniformLocation(program, "material.specularPower");
 
-	int alphaTexUniform = glGetUniformLocation(program, "material.alphaTexture");
-	int ambientTexUniform = glGetUniformLocation(program, "ambientTexture");
 	int diffuseTexUniform = glGetUniformLocation(program, "material.diffuseTexture");
 	int specTexUniform = glGetUniformLocation(program, "material.specularTexture");
-	int specHighlightTexUniform = glGetUniformLocation(program, "specularHighlightTexture");
 	int normalTexUniform = glGetUniformLocation(program, "material.normalTexture");
-	int dispTexUniform = glGetUniformLocation(program, "displacementTexture");
+	int alphaTexUniform = glGetUniformLocation(program, "material.alphaTexture");
 
 	// set texture slots (these don't change per material)
 	if (diffuseTexUniform >= 0)
-		glUniform1i(diffuseTexUniform, 0);
-	if (alphaTexUniform >= 0)
-		glUniform1i(alphaTexUniform, 1);
-	if (ambientTexUniform >= 0)
-		glUniform1i(ambientTexUniform, 2);
+		glUniform1i(diffuseTexUniform, 1);
 	if (specTexUniform >= 0)
-		glUniform1i(specTexUniform, 3);
-	if (specHighlightTexUniform >= 0)
-		glUniform1i(specHighlightTexUniform, 4);
+		glUniform1i(specTexUniform, 2);
 	if (normalTexUniform >= 0)
-		glUniform1i(normalTexUniform, 5);
-	if (dispTexUniform >= 0)
-		glUniform1i(dispTexUniform, 6);
+		glUniform1i(normalTexUniform, 3);
+	if (alphaTexUniform >= 0)
+		glUniform1i(alphaTexUniform, 4);
 
 	int currentMaterial = -1;
 
@@ -226,46 +223,28 @@ void OBJMesh::draw(bool usePatches)
 			if (specPowUniform >= 0)
 				glUniform1f(specPowUniform, m_materials[currentMaterial].specularPower);
 
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE1);
 			if (m_materials[currentMaterial].diffuseTexture.id > 0)
 				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].diffuseTexture.id);
 			else if (diffuseTexUniform >= 0)
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-			glActiveTexture(GL_TEXTURE1);
-			if (m_materials[currentMaterial].alphaTexture.id > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].alphaTexture.id);
-			else if (alphaTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
 			glActiveTexture(GL_TEXTURE2);
-			if (m_materials[currentMaterial].ambientTexture.id > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].ambientTexture.id);
-			else if (ambientTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-			glActiveTexture(GL_TEXTURE3);
 			if (m_materials[currentMaterial].specularTexture.id > 0)
 				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].specularTexture.id);
 			else if (specTexUniform >= 0)
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-			glActiveTexture(GL_TEXTURE4);
-			if (m_materials[currentMaterial].specularHighlightTexture.id > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].specularHighlightTexture.id);
-			else if (specHighlightTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-			glActiveTexture(GL_TEXTURE5);
+			glActiveTexture(GL_TEXTURE3);
 			if (m_materials[currentMaterial].normalTexture.id > 0)
 				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].normalTexture.id);
 			else if (normalTexUniform >= 0)
 				glBindTexture(GL_TEXTURE_2D, 0);
 
-			glActiveTexture(GL_TEXTURE6);
-			if (m_materials[currentMaterial].displacementTexture.id > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].displacementTexture.id);
-			else if (dispTexUniform >= 0)
+			glActiveTexture(GL_TEXTURE4);
+			if (m_materials[currentMaterial].alphaTexture.id > 0)
+				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].alphaTexture.id);
+			else if (alphaTexUniform >= 0)
 				glBindTexture(GL_TEXTURE_2D, 0);
 		}
 

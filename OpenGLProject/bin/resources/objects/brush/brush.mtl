@@ -7,7 +7,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Bump textures\\m_body_nrm.png
-map_Kd textures\\m_body_alb.png
-map_Ns textures\\m_body_spm.png
-map_Ke textures\\m_body_tcl.png
+map_Kd \\textures\\m_body_alb.png
+map_Ks \\textures\\m_body_spm.png
+map_bump \\textures\\m_body_nrm.png
+map_d \\textures\\m_body_tcl.png

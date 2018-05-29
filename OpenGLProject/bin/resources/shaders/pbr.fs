@@ -24,17 +24,19 @@ struct Material
 	vec3 diffuse;
 	vec3 specular;
 	float emissive;
+
 	float roughness;
 	float reflectionCoefficient;
 
 	sampler2D diffuseTexture;
 	sampler2D specularTexture;
-	//sampler2D normalTexture;
+	sampler2D normalTexture;
 	//sampler2D alphaTexture;
 };
 uniform Material material;
 
 uniform vec3 cameraPosition;
+uniform samplerCube skybox;
 
 out vec4 FragColor;
 
@@ -43,15 +45,19 @@ void main()
 	// sample textures
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
-	//vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
+	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 	//vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
-	
+
 	// tangent space normals
-	//vec3 N = TBN * (normalTexture * 2 - 1);
-	vec3 N = TBN[2];
+	vec3 N = TBN * (normalTexture * 2 - 1);
+	//vec3 N = TBN[2];
 	vec3 L = normalize(light.position - vPosition.xyz);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
+
+	vec3 I = normalize(vPosition.xyz - cameraPosition);
+	vec3 R = reflect(I, normalize(N));
+	vec3 skyboxTexture = texture(skybox, R).rgb;
 
 	// ambient lightning
 	vec3 ambient = light.ambient * material.ambient;
@@ -102,12 +108,14 @@ void main()
 
 	vec3 specular = light.specular * material.specular * CookTorrance;
 
-
 	// multiply by textures
 	ambient *= diffuseTexture;
 	diffuse *= diffuseTexture;
-	specular *= specularTexture;
+	//specular *= specularTexture;
+
+	vec3 combined = ambient + diffuse;
+	combined = mix(combined, skyboxTexture, 0.1) + specular;
 
 	// output final color
-	FragColor = vec4(ambient + diffuse + specular, 1);
+	FragColor = vec4(combined, 1);
 }

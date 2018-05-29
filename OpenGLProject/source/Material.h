@@ -9,20 +9,17 @@ struct Material
 	~Material() {}
 
 	// lighting
-	glm::vec3 ambient; // ambient light
-	glm::vec3 diffuse; // diffuse light
-	glm::vec3 specular; // specular light
-	glm::vec3 emissive; // emissive light
+	glm::vec3 ambient; // ambient color
+	glm::vec3 diffuse; // diffuse color
+	glm::vec3 specular; // specular color
+	glm::vec3 emissive; // emissive color
 
 	float specularPower;
 	float opacity;
 
 	// textures
-	Texture diffuseTexture;
-	Texture alphaTexture;
-	Texture ambientTexture;
-	Texture specularTexture;
-	Texture specularHighlightTexture;
-	Texture normalTexture;
-	Texture displacementTexture;
+	Texture diffuseTexture; // diffuse texture
+	Texture specularTexture; // specular texture
+	Texture normalTexture; // normal texture
+	Texture alphaTexture; // alpha texture
 };

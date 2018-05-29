@@ -6,9 +6,7 @@ layout(location = 2) in vec2 TexCoords;
 layout(location = 3) in vec4 Tangent;
 
 out vec4 vPosition;
-out vec3 vNormal;
-out vec3 vTangent;
-out vec3 vBiTangent;
+out mat3 TBN;
 out vec2 vTexCoords;
 
 uniform mat4 ProjectionViewModel;
@@ -24,10 +22,12 @@ void main()
 	vPosition = ModelMatrix * Position;
 	
 	// calculate TBN in vertex shader for efficiency
-	vNormal = NormalMatrix * Normal.xyz;
-	vTangent = NormalMatrix * Tangent.xyz;
-	vBiTangent = cross(vNormal, vTangent) * Tangent.w;
+	vec3 N = normalize(NormalMatrix * Normal.xyz);
+	vec3 T = normalize(NormalMatrix * Tangent.xyz);
+	vec3 B = cross(N, T) * Tangent.w;
 	
+	TBN = mat3(T, B, N);
+
 	vTexCoords = TexCoords;
 	gl_Position = ProjectionViewModel * Position;
 }
