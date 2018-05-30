@@ -27,12 +27,20 @@ out vec4 FragColor;
 
 void main()
 {
+	// index of refraction (water)
+	float ratio = 1.0 / 1.33;
+
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 	vec3 N = TBN * (normalTexture * 2 - 1);
 
 	vec3 I = normalize(vPosition.xyz - cameraPosition);
-	vec3 R = reflect(I, normalize(N));
+
+	// reflect
+	//vec3 R = reflect(I, normalize(N));
+
+	// refract
+	vec3 R = refract(I, normalize(N), ratio);
 
 	// output final color
-	FragColor = vec4(texture(skybox, R).rgb, 1);
+	FragColor = vec4(texture(skybox, R).rgb * vec3(0.8, 0.8, 1.0), 1);
 }

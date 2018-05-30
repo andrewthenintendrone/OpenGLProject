@@ -36,7 +36,6 @@ struct Material
 uniform Material material;
 
 uniform vec3 cameraPosition;
-uniform samplerCube skybox;
 
 out vec4 FragColor;
 
@@ -54,10 +53,6 @@ void main()
 	vec3 L = normalize(light.position - vPosition.xyz);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
-
-	vec3 I = normalize(vPosition.xyz - cameraPosition);
-	vec3 R = reflect(I, normalize(N));
-	vec3 skyboxTexture = texture(skybox, R).rgb;
 
 	// ambient lightning
 	vec3 ambient = light.ambient * material.ambient;
@@ -111,11 +106,8 @@ void main()
 	// multiply by textures
 	ambient *= diffuseTexture;
 	diffuse *= diffuseTexture;
-	//specular *= specularTexture;
-
-	vec3 combined = ambient + diffuse;
-	combined = mix(combined, skyboxTexture, 0.1) + specular;
+	specular *= specularTexture;
 
 	// output final color
-	FragColor = vec4(combined, 1);
+	FragColor = vec4(ambient + diffuse + specular, 1);
 }

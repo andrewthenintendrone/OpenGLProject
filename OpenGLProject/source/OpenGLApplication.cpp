@@ -71,7 +71,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\mirror.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\mirror.fs").c_str());
 	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate mesh(es)
