@@ -1,76 +1,150 @@
+#include <glad\glad.h>
 #include "Texture.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb\stb_image.h>
-#include <glad\glad.h>
-#include <iostream>
 
-void Texture::load(const std::string& filename)
+Texture::Texture()
+	: m_filename("none"),
+	m_width(0),
+	m_height(0),
+	m_glHandle(0),
+	m_format(0),
+	m_loadedPixels(nullptr) {
+}
+
+Texture::Texture(const char* filename)
+	: m_filename("none"),
+	m_width(0),
+	m_height(0),
+	m_glHandle(0),
+	m_format(0),
+	m_loadedPixels(nullptr) {
+
+	load(filename);
+}
+
+Texture::Texture(unsigned int width, unsigned int height, Format format, unsigned char* pixels)
+	: m_filename("none"),
+	m_width(width),
+	m_height(height),
+	m_format(format),
+	m_loadedPixels(nullptr) {
+
+	create(width, height, format, pixels);
+}
+
+Texture::~Texture()
 {
-	// don't try to load if this texture is already initialised
-	assert(id == 0);
+	if (m_glHandle != 0)
+		glDeleteTextures(1, &m_glHandle);
+	if (m_loadedPixels != nullptr)
+		stbi_image_free(m_loadedPixels);
+}
 
-	// store file path
-	path = filename;
-
-	// generate textures
-	glGenTextures(1, &id);
-
-	// create variables for texture size and format
-	int width, height, channels;
-
-	// attempt to read texture
-	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
-
-	// if data was read succesfully
-	if (data)
+bool Texture::load(const char* filename)
+{
+	if (m_glHandle != 0)
 	{
-		std::cout << "Loaded texture from " << path << std::endl;
+		glDeleteTextures(1, &m_glHandle);
+		m_glHandle = 0;
+		m_width = 0;
+		m_height = 0;
+		m_filename = "none";
+	}
 
-		// determine texture format
-		GLenum format;
-		switch (channels)
+	int x = 0, y = 0, comp = 0;
+	m_loadedPixels = stbi_load(filename, &x, &y, &comp, STBI_default);
+
+	if (m_loadedPixels != nullptr)
+	{
+		glGenTextures(1, &m_glHandle);
+		glBindTexture(GL_TEXTURE_2D, m_glHandle);
+
+		switch (comp)
 		{
-			// 1 channel texture
-		case(1):
-			format = GL_RED;
+		case STBI_grey:
+			m_format = RED;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, x, y,
+				0, GL_RED, GL_UNSIGNED_BYTE, m_loadedPixels);
 			break;
-			// 3 channel rgb texture
-		case(3):
-			format = GL_RGB;
+		case STBI_grey_alpha:
+			m_format = RG;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, x, y,
+				0, GL_RG, GL_UNSIGNED_BYTE, m_loadedPixels);
 			break;
-			// 4 channel rgba texture
-		case(4):
-			format = GL_RGBA;
+		case STBI_rgb:
+			m_format = RGB;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y,
+				0, GL_RGB, GL_UNSIGNED_BYTE, m_loadedPixels);
+			break;
+		case STBI_rgb_alpha:
+			m_format = RGBA;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y,
+				0, GL_RGBA, GL_UNSIGNED_BYTE, m_loadedPixels);
 			break;
 		default:
-			std::cout << "Unknown number of channels\n";
 			break;
-		}
+		};
 
-		// bind our texture id
-		glBindTexture(GL_TEXTURE_2D, id);
-
-		// transfer texture data to gpu
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
-		// generate mip maps
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		// set texture repeat settings
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		// set texture filter settings
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		m_width = (unsigned int)x;
+		m_height = (unsigned int)y;
+		m_filename = filename;
+		return true;
+	}
 
-		// free image data (it is already on the GPU)
-		stbi_image_free(data);
-	}
-	else
+	return false;
+}
+
+void Texture::create(unsigned int width, unsigned int height, Format format, unsigned char* pixels)
+{
+	if (m_glHandle != 0)
 	{
-		std::cout << "Failed to load a texture from " << path << std::endl;
-		stbi_image_free(data);
-		return;
+		glDeleteTextures(1, &m_glHandle);
+		m_glHandle = 0;
+		m_filename = "none";
 	}
+
+	m_width = width;
+	m_height = height;
+	m_format = format;
+
+	glGenTextures(1, &m_glHandle);
+	glBindTexture(GL_TEXTURE_2D, m_glHandle);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	switch (m_format)
+	{
+	case RED:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+		break;
+	case RG:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, m_width, m_height, 0, GL_RG, GL_UNSIGNED_BYTE, pixels);
+		break;
+	case RGB:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+		break;
+	case RGBA:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		break;
+	default:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::bind(unsigned int slot) const
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, m_glHandle);
 }

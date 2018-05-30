@@ -163,6 +163,7 @@
     <ClCompile Include="source\OBJMesh.cpp" />
     <ClCompile Include="source\OpenGLApplication.cpp" />
     <ClCompile Include="source\PerlinNoise.cpp" />
+    <ClCompile Include="source\RenderTarget.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
     <ClCompile Include="source\Texture.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="source\OBJMesh.h" />
     <ClInclude Include="source\OpenGLApplication.h" />
     <ClInclude Include="source\PerlinNoise.h" />
+    <ClInclude Include="source\RenderTarget.h" />
     <ClInclude Include="source\Shader.h" />
     <ClInclude Include="source\Terrain.h" />
     <ClInclude Include="source\Texture.h" />

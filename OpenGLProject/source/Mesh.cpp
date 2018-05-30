@@ -102,7 +102,7 @@ void Mesh::initialiseQuad()
 
 	// texture
 	Texture texture;
-	texture.load(fs::current_path().string() + "\\resources\\chess.jpg");
+	texture.load((fs::current_path().string() + "\\resources\\chess.jpg").c_str());
 
 	std::vector<unsigned int> indices{ 0, 1, 2, 2, 1, 3 };
 
