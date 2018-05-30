@@ -71,7 +71,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 }
 
 // activate this Shader
-void Shader::use()
+void Shader::bind()
 {
 	glUseProgram(ID);
 }

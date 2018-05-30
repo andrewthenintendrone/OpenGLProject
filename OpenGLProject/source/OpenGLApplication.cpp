@@ -71,12 +71,14 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\mirror.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\mirror.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
+	m_simpleShader = Shader((fs::current_path().string() + "\\resources\\shaders\\simple.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\simple.fs").c_str());
 
 	// generate mesh(es)
 	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
 	m_skybox.initialiseBox();
+	m_screenQuad.initialiseQuad();
 
 	// load skybox textures
 	std::vector<std::string> skyboxTextures;
@@ -99,6 +101,11 @@ void OpenGLApplication::setup()
 	m_material.specular = Color::White().asVec3();
 
 	m_camera.setPosition(glm::vec3(-10, 10, 10));
+
+	if (m_renderTarget.initialise(1, m_windowWidth, m_windowHeight) == 0)
+	{
+		printf("Render Target Error\n");
+	}
 }
 
 void OpenGLApplication::run()
@@ -125,12 +132,15 @@ void OpenGLApplication::update()
 
 void OpenGLApplication::render()
 {
+	// bind our render target
+	m_renderTarget.bind();
+
 	// clear the color and depth buffers
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// enable shader
-	m_shader.use();
+	m_shader.bind();
 
 	float time = glfwGetTime();
 
@@ -171,12 +181,25 @@ void OpenGLApplication::render()
 
 	// draw skybox last
 	glDepthFunc(GL_LEQUAL);
-	m_skyShader.use();
+	m_skyShader.bind();
 	m_skyShader.setMat4("view", glm::mat4(glm::mat3(m_camera.GetViewMatrix())));
 	m_skyShader.setMat4("projection", m_camera.getProjectionMatrix());
 	m_skyShader.setInt("skybox", 0);
 	m_skybox.draw(m_skyShader);
 	glDepthFunc(GL_LESS);
+
+	// unbind target to return to backbuffer
+	m_renderTarget.unbind();
+
+	// render rendertarget onto screen quad
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_simpleShader.bind();
+	glm::mat4 dummyTransform(1);
+	m_simpleShader.setMat4("ProjectionViewModel", dummyTransform);
+	m_simpleShader.setInt("material.diffuseTexture", 0);
+	m_renderTarget.getTarget(0).bind(0);
+	m_simpleShader.setFloat("time", time);
+	m_screenQuad.draw(m_simpleShader);
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

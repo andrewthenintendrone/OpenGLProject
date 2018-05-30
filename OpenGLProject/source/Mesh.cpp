@@ -83,15 +83,15 @@ void Mesh::initialiseQuad()
 	std::vector<Vertex> verts(4);
 
 	// positions
-	verts[0].position = glm::vec4(-0.5f, 0, 0.5f, 1);
-	verts[1].position = glm::vec4(0.5f, 0, 0.5f, 1);
-	verts[2].position = glm::vec4(-0.5f, 0, -0.5f, 1);
-	verts[3].position = glm::vec4(0.5f, 0, -0.5f, 1);
+	verts[0].position = glm::vec4(-1, -1, 0, 1);
+	verts[1].position = glm::vec4(1, -1, 0, 1);
+	verts[2].position = glm::vec4(-1, 1, 0, 1);
+	verts[3].position = glm::vec4(1, 1, 0, 1);
 
 	// normals
 	for(int i = 0; i < 4; i++)
 	{
-		verts[i].normal = glm::vec4(0, 1, 0, 0);
+		verts[i].normal = glm::vec4(0, 0, 1, 0);
 	}
 
 	// texCoords
@@ -101,12 +101,9 @@ void Mesh::initialiseQuad()
 	verts[3].texcoord = glm::vec2(1, 1);
 
 	// texture
-	Texture texture;
-	texture.load((fs::current_path().string() + "\\resources\\chess.jpg").c_str());
-
 	std::vector<unsigned int> indices{ 0, 1, 2, 2, 1, 3 };
 
-	initialise(verts, &indices, &texture);
+	initialise(verts, &indices);
 }
 
 void Mesh::initialiseBox()

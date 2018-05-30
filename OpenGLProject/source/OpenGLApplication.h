@@ -12,6 +12,7 @@
 #include "Mesh.h"
 #include "OBJMesh.h"
 #include "Cubemap.h"
+#include "RenderTarget.h"
 
 // OpenGLApplication class that manages everything
 class OpenGLApplication
@@ -57,4 +58,9 @@ private:
 
 	// Mesh(es)
 	OBJMesh m_mesh;
+
+	// RenderTarget(s)
+	RenderTarget m_renderTarget;
+	Mesh m_screenQuad;
+	Shader m_simpleShader;
 };
