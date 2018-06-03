@@ -1,6 +1,7 @@
 #include "FlyCamera.h"
 #include "Time.h"
 #include <algorithm>
+#include <iostream>
 
 FlyCamera::FlyCamera()
 {

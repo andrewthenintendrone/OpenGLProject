@@ -5,7 +5,7 @@ class RenderTarget
 {
 public:
 
-	RenderTarget();
+	RenderTarget() {};
 	RenderTarget(unsigned int targetCount, unsigned int width, unsigned int height);
 	virtual ~RenderTarget();
 
@@ -25,12 +25,12 @@ public:
 
 protected:
 
-	unsigned int m_width;
-	unsigned int m_height;
+	unsigned int m_width = 0;
+	unsigned int m_height = 0;
 
-	unsigned int m_fbo;
-	unsigned int m_rbo;
+	unsigned int m_fbo = 0;
+	unsigned int m_rbo = 0;
 
-	unsigned int m_targetCount;
-	Texture* m_targets;
+	unsigned int m_targetCount = 0;
+	Texture* m_targets = nullptr;
 };

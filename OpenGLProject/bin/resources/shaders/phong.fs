@@ -7,7 +7,7 @@ in vec2 vTexCoords;
 
 struct Light
 {
-	vec3 direction;
+	vec3 position;
 	
 	vec3 ambient;
 	vec3 diffuse;
@@ -41,11 +41,11 @@ void main()
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 
 	// ambient lightning
-	vec3 ambient = light.ambient * material.ambient * diffuseTexture;
+	vec3 ambient = light.ambient * material.ambient * diffuseTexture * 0.25;
 
 	// diffuse lighting
 	vec3 N = normalize(vNormal);
-	vec3 L = normalize(light.direction);
+	vec3 L = normalize(vPosition.xyz - light.position);
 	float lambertTerm = max(0, min(1, dot(N, -L)));
 	vec3 diffuse = light.diffuse * material.diffuse * lambertTerm * diffuseTexture;
 
@@ -53,7 +53,7 @@ void main()
 	vec3 V = normalize(cameraPosition - vPosition.xyz);
 	vec3 R = reflect(L, N);
 	float specularTerm = pow(max(0, dot(R, V)), material.specularPower);
-	vec3 specular = light.specular * material.specular * specularTerm * specularTexture;
+	vec3 specular = light.specular * material.specular * specularTerm;
 	
 	// output final color
 	FragColor = vec4(ambient + diffuse + specular, 1);

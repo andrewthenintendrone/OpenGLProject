@@ -31,20 +31,10 @@ void Camera::setLookAt(const glm::vec3 lookAt)
 	updateTransform();
 }
 
-// Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-//void Camera::ProcessMouseScroll(float yoffset)
-//{
-//	if (Zoom >= 1.0f && Zoom <= 45.0f)
-//		Zoom -= yoffset;
-//	if (Zoom <= 1.0f)
-//		Zoom = 1.0f;
-//	if (Zoom >= 45.0f)
-//		Zoom = 45.0f;
-//}
-
 // Calculates the front vector from the Camera's (updated) Euler Angles
 void Camera::updateTransform()
 {
+	// create view matrix
 	m_viewMatrix = glm::lookAt(glm::vec3(m_position), glm::vec3(m_targetPosition), glm::vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), (float)m_screenWidth / (float)m_screenHeight, m_nearPlane, m_farPlane);
 }

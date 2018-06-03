@@ -71,12 +71,12 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\deferred.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\deferred.fs").c_str());
 	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
-	m_simpleShader = Shader((fs::current_path().string() + "\\resources\\shaders\\simple.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\simple.fs").c_str());
+	m_postProcessingShader = Shader((fs::current_path().string() + "\\resources\\shaders\\postprocessing.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\postprocessing.fs").c_str());
 
 	// generate mesh(es)
-	m_mesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
+	m_model.load((fs::current_path().string() + "\\resources\\objects\\kart\\kart.obj").c_str(), true, true);
 	m_skybox.initialiseBox();
 	m_screenQuad.initialiseQuad();
 
@@ -95,14 +95,9 @@ void OpenGLApplication::setup()
 	m_light.diffuse = Color::White().asVec3();
 	m_light.specular = Color::White().asVec3();
 
-	// set up material
-	m_material.ambient = Color::White().asVec3() * 0.25f;
-	m_material.diffuse = Color::White().asVec3();
-	m_material.specular = Color::White().asVec3();
-
 	m_camera.setPosition(glm::vec3(-10, 10, 10));
 
-	if (m_renderTarget.initialise(1, m_windowWidth, m_windowHeight) == 0)
+	if (m_renderTarget.initialise(4, m_windowWidth, m_windowHeight) == 0)
 	{
 		printf("Render Target Error\n");
 	}
@@ -152,14 +147,6 @@ void OpenGLApplication::render()
 	m_shader.setVec3("light.diffuse", m_light.diffuse);
 	m_shader.setVec3("light.specular", m_light.specular);
 
-	// update material
-	m_shader.setVec3("material.ambient", m_material.ambient);
-	m_shader.setVec3("material.diffuse", m_material.diffuse);
-	m_shader.setVec3("material.specular", m_material.specular);
-	m_shader.setFloat("material.emissive", std::sin(time * 3.0f) * 0.5f + 0.5f);
-	m_shader.setFloat("material.roughness", 0.25f);
-	m_shader.setFloat("material.reflectionCoefficient", 0.25f);
-
 	// send camera position
 	m_shader.setVec3("cameraPosition", m_camera.getPosition());
 
@@ -177,7 +164,9 @@ void OpenGLApplication::render()
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_shader.setMat3("NormalMatrix", normalMatrix);
 
-	m_mesh.draw();
+	m_shader.setFloat("time", time);
+
+	m_model.draw();
 
 	// draw skybox last
 	glDepthFunc(GL_LEQUAL);
@@ -193,13 +182,19 @@ void OpenGLApplication::render()
 
 	// render rendertarget onto screen quad
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_simpleShader.bind();
+	m_postProcessingShader.bind();
 	glm::mat4 dummyTransform(1);
-	m_simpleShader.setMat4("ProjectionViewModel", dummyTransform);
-	m_simpleShader.setInt("material.diffuseTexture", 0);
+	m_postProcessingShader.setMat4("ProjectionViewModel", dummyTransform);
+	m_postProcessingShader.setInt("diffuseTexture", 0);
+	m_postProcessingShader.setInt("specularTexture", 1);
+	m_postProcessingShader.setInt("normalTexture", 2);
+	m_postProcessingShader.setInt("alphaTexture", 3);
 	m_renderTarget.getTarget(0).bind(0);
-	m_simpleShader.setFloat("time", time);
-	m_screenQuad.draw(m_simpleShader);
+	m_renderTarget.getTarget(1).bind(1);
+	m_renderTarget.getTarget(2).bind(2);
+	m_renderTarget.getTarget(3).bind(3);
+	m_postProcessingShader.setFloat("time", time);
+	m_screenQuad.draw(m_postProcessingShader);
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

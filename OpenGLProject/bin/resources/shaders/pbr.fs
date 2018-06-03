@@ -23,7 +23,7 @@ struct Material
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
-	float emissive;
+	vec3 emissive;
 
 	float roughness;
 	float reflectionCoefficient;
@@ -31,13 +31,17 @@ struct Material
 	sampler2D diffuseTexture;
 	sampler2D specularTexture;
 	sampler2D normalTexture;
-	//sampler2D alphaTexture;
+	sampler2D alphaTexture;
 };
 uniform Material material;
+
+uniform float time;
 
 uniform vec3 cameraPosition;
 
 out vec4 FragColor;
+out vec4 FragNormals;
+out vec4 FragDepth;
 
 void main()
 {
@@ -45,11 +49,11 @@ void main()
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
-	//vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
+	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
 
 	// tangent space normals
-	vec3 N = TBN * (normalTexture * 2 - 1);
-	//vec3 N = TBN[2];
+	//vec3 N = TBN * (normalTexture * 2 - 1);
+	vec3 N = TBN[2];
 	vec3 L = normalize(light.position - vPosition.xyz);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
@@ -109,5 +113,7 @@ void main()
 	specular *= specularTexture;
 
 	// output final color
-	FragColor = vec4(ambient + diffuse + specular, 1);
+	FragColor = vec4(ambient + diffuse + specular, 1) * 0.5;
+	FragNormals = vec4(N, 1.0);
+	FragDepth = vec4(vPosition.w);
 }

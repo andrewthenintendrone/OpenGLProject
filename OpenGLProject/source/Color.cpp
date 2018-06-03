@@ -1,4 +1,6 @@
 #include "Color.h"
+#include <fstream>
+#include <iostream>
 
 Color::Color()
 {

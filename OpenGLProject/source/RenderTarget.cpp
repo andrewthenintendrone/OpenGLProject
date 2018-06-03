@@ -2,18 +2,8 @@
 #include <glad\glad.h>
 #include <vector>
 
-RenderTarget::RenderTarget()
-	: m_width(0),
-	m_height(0),
-	m_targetCount(0),
-	m_targets(nullptr) {
-}
-
 RenderTarget::RenderTarget(unsigned int targetCount, unsigned int width, unsigned int height)
-	: m_width(0),
-	m_height(0),
-	m_targetCount(0),
-	m_targets(nullptr) {
+{
 	initialise(targetCount, width, height);
 }
 
