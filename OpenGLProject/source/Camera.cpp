@@ -1,40 +1,43 @@
 #include "Camera.h"
 #include "Time.h"
 
-const glm::mat4 Camera::getProjectionMatrix()
+Camera::Camera()
 {
-	return m_projectionMatrix;
-}
-
-// returns the view matrix
-const glm::mat4 Camera::GetViewMatrix()
-{
-	return m_viewMatrix;
-}
-
-// returns the projection matrix
-const glm::mat4 Camera::getProjectionViewMatrix()
-{
-	return m_projectionMatrix * m_viewMatrix;
+	updateProjectionMatrix();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
 // set the position of the camera
 void Camera::setPosition(const glm::vec3 position)
 {
 	m_position = glm::vec4(position, 1.0f);
-	updateTransform();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
 void Camera::setLookAt(const glm::vec3 lookAt)
 {
 	m_targetPosition = lookAt;
-	updateTransform();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
-// Calculates the front vector from the Camera's (updated) Euler Angles
-void Camera::updateTransform()
+// update the projection matrix (done only when the screen size or FOV changes)
+void Camera::updateProjectionMatrix()
 {
-	// create view matrix
-	m_viewMatrix = glm::lookAt(glm::vec3(m_position), glm::vec3(m_targetPosition), glm::vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), (float)m_screenWidth / (float)m_screenHeight, m_nearPlane, m_farPlane);
+}
+
+
+// update the view matrix (done when needed)
+void Camera::updateViewMatrix()
+{
+	m_viewMatrix = glm::lookAt(glm::vec3(m_position), glm::vec3(m_targetPosition), glm::vec3(0, 1, 0));
+}
+
+// update the projection view matrix (done whenever view or projection matrix is changed)
+void Camera::updateProjectionViewMatrix()
+{
+	m_projectionViewMatrix = m_projectionMatrix * m_viewMatrix;
 }
