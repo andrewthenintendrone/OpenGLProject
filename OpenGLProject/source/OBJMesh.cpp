@@ -61,13 +61,43 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 		m_materials[index].specularPower = m.shininess;
 		m_materials[index].opacity = m.dissolve;
 
-		// load material textures
-		m_materials[index].alphaTexture.load((folder + m.alpha_texname).c_str());
-		m_materials[index].ambientTexture.load((folder + m.ambient_texname).c_str());
-		m_materials[index].diffuseTexture.load((folder + m.diffuse_texname).c_str());
-		m_materials[index].specularTexture.load((folder + m.specular_texname).c_str());
-		m_materials[index].normalTexture.load((folder + m.bump_texname).c_str());
-		m_materials[index].displacementTexture.load((folder + m.displacement_texname).c_str());
+		// load / generate material textures
+		if (!m_materials[index].alphaTexture.load((folder + m.alpha_texname).c_str()))
+		{
+			unsigned char pixels[4] { 255, 255, 255, 255 };
+
+			m_materials[index].alphaTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
+		if (!m_materials[index].ambientTexture.load((folder + m.ambient_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 255, 255, 255, 255 };
+
+			m_materials[index].ambientTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
+		if (!m_materials[index].diffuseTexture.load((folder + m.diffuse_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 255, 255, 255, 255 };
+
+			m_materials[index].diffuseTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
+		if (!m_materials[index].specularTexture.load((folder + m.specular_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 255, 255, 255, 255 };
+
+			m_materials[index].specularTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
+		if (!m_materials[index].normalTexture.load((folder + m.bump_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 128, 128, 255, 255 };
+
+			m_materials[index].normalTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
+		if (!m_materials[index].displacementTexture.load((folder + m.displacement_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 0, 0, 0, 255 };
+
+			m_materials[index].displacementTexture.create(1, 1, Texture::Format::RGBA, pixels);
+		}
 
 		index++;
 	}

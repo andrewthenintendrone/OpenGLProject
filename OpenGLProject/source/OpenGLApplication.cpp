@@ -76,7 +76,7 @@ void OpenGLApplication::setup()
 	m_postProcessingShader = Shader((fs::current_path().string() + "\\resources\\shaders\\postprocessing.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\postprocessing.fs").c_str());
 
 	// generate mesh(es)
-	m_model.load((fs::current_path().string() + "\\resources\\objects\\kart\\kart.obj").c_str(), true, true);
+	m_model.load((fs::current_path().string() + "\\resources\\objects\\dragon\\dragon.obj").c_str(), true, true);
 	m_skybox.initialiseBox();
 	m_screenQuad.initialiseQuad();
 
