@@ -17,6 +17,7 @@ vec4 BoxBlur();
 vec4 Distort();
 vec4 Pixelate(int pixelSizeX, int pixelSizeY);
 vec4 Invert();
+void make_kernel(inout vec4 n[9], sampler2D tex, vec2 coord);
 float LinearizeDepth(float depth);
 
 const float near = 0.1;
@@ -26,7 +27,17 @@ const float offset = 1.0 / 100.0;
 
 void main()
 {
-	FragColor = texture(diffuseTexture, vTexCoords) + BoxBlur();
+	vec4 n[9];
+	make_kernel(n, diffuseTexture, vTexCoords);
+
+	vec4 sobel_edge_h = n[2] + (2.0 * n[5]) + n[8] - (n[0] + (2.0 * n[3]) + n[6]);
+  	vec4 sobel_edge_v = n[0] + (2.0 * n[1]) + n[2] - (n[6] + (2.0 * n[7]) + n[8]);
+	vec4 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
+
+	float intensity = sobel.x + sobel.y + sobel.z;
+	intensity /= 3.0;
+
+	FragColor = vec4(vec3(1.0 - intensity), 1.0) * texture(diffuseTexture, vTexCoords);
 }
 
 vec4 Distort()
@@ -49,6 +60,22 @@ vec4 Pixelate(int pixelSizeX, int pixelSizeY)
 vec4 Invert()
 {
 	return vec4(vec3(1) - texture(diffuseTexture, vTexCoords).xyz, 1.0);
+}
+
+void make_kernel(inout vec4 n[9], sampler2D tex, vec2 coord)
+{
+	float w = 1.0 / 1280.0;
+	float h = 1.0 / 720.0;
+
+	n[0] = texture2D(tex, coord + vec2( -w, -h));
+	n[1] = texture2D(tex, coord + vec2(0.0, -h));
+	n[2] = texture2D(tex, coord + vec2(  w, -h));
+	n[3] = texture2D(tex, coord + vec2( -w, 0.0));
+	n[4] = texture2D(tex, coord);
+	n[5] = texture2D(tex, coord + vec2(  w, 0.0));
+	n[6] = texture2D(tex, coord + vec2( -w, h));
+	n[7] = texture2D(tex, coord + vec2(0.0, h));
+	n[8] = texture2D(tex, coord + vec2(  w, h));
 }
 
 float LinearizeDepth(float depth)

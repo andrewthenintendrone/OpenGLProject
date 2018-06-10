@@ -5,14 +5,17 @@
 
 FlyCamera::FlyCamera()
 {
-	
+	updateViewMatrix();
+	updateProjectionMatrix();
+	updateProjectionViewMatrix();
 }
 
 void FlyCamera::setPosition(const glm::vec3 position)
 {
 	m_position = position;
 
-	updateTransform();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
 void FlyCamera::processKeyboard(Camera_Movement direction)
@@ -37,7 +40,8 @@ void FlyCamera::processKeyboard(Camera_Movement direction)
 		break;
 	}
 
-	updateTransform();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
 void FlyCamera::processMouseMovement(float xoffset, float yoffset)
@@ -51,10 +55,11 @@ void FlyCamera::processMouseMovement(float xoffset, float yoffset)
 	m_pitch = std::min(89.0f, m_pitch);
 	m_pitch = std::max(-89.0f, m_pitch);
 
-	updateTransform();
+	updateViewMatrix();
+	updateProjectionViewMatrix();
 }
 
-void FlyCamera::updateTransform()
+void FlyCamera::updateViewMatrix()
 {
 	// Calculate front vector
 	glm::vec3 front;
@@ -69,5 +74,5 @@ void FlyCamera::updateTransform()
 	m_up = glm::normalize(glm::cross(m_right, m_front));
 
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
-	m_projectionMatrix = glm::perspective(glm::radians(m_fieldOfView), (float)m_screenWidth / (float)m_screenHeight, m_nearPlane, m_farPlane);
 }
+

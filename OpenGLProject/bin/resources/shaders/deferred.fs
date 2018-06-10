@@ -33,8 +33,8 @@ out vec4 FragAlpha;
 
 void main()
 {
-	FragDiffuse = texture(material.diffuseTexture, vTexCoords);
-	FragSpecular = texture(material.specularTexture, vTexCoords);
+	FragDiffuse = texture(material.diffuseTexture, vTexCoords) * vec4(material.diffuse, 1.0);
+	FragSpecular = texture(material.specularTexture, vTexCoords) * vec4(material.specular, 1.0);
 	FragNormal = vec4(TBN * (texture(material.normalTexture, vTexCoords).xyz * 0.5 + 0.5), 1.0);
-	FragAlpha = texture(material.alphaTexture, vTexCoords);
+	FragAlpha = texture(material.alphaTexture, vTexCoords) * vec4(material.emissive, 1.0);
 }

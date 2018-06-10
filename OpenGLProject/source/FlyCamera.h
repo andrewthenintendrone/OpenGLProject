@@ -25,7 +25,7 @@ public:
 
 private:
 
-	void updateTransform();
+	void updateViewMatrix();
 
 	glm::vec3 m_front = glm::vec3(0, 0, 1);
 	glm::vec3 m_right = glm::vec3(1, 0, 0);
