@@ -10,6 +10,7 @@
 #include "FlyCamera.h"
 #include "Light.h"
 #include "Mesh.h"
+#include "Terrain.h"
 #include "OBJMesh.h"
 #include "Cubemap.h"
 #include "RenderTarget.h"
@@ -56,7 +57,7 @@ private:
 	Cubemap m_cubemap;
 
 	// Mesh(es)
-	OBJMesh m_model;
+	Terrain m_model;
 
 	// RenderTarget(s)
 	RenderTarget m_renderTarget;

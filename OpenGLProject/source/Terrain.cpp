@@ -20,9 +20,9 @@ Terrain::Terrain(unsigned int gridSizeX, unsigned int gridSizeY) : m_gridSizeX(g
 // generate terrain using perlin noise
 void Terrain::generatePerlin()
 {
-	for (int x = 0; x < m_gridSizeX; x++)
+	for (unsigned int x = 0; x < m_gridSizeX; x++)
 	{
-		for (int y = 0; y < m_gridSizeY; y++)
+		for (unsigned int y = 0; y < m_gridSizeY; y++)
 		{
 			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 20, 0.5f);
 
@@ -33,61 +33,7 @@ void Terrain::generatePerlin()
 	init();
 }
 
-// set heights using the diamond square algorithm
-void Terrain::generateDiamondSquare(int featureSize)
-{
-	// seed corners
-	m_heights(0, 0) = frand(0, 1);
-	m_heights(m_gridSizeX - 1, 0) = frand(0, 1);
-	m_heights(0, m_gridSizeY - 1) = frand(0, 1);
-	m_heights(m_gridSizeX - 1, m_gridSizeY - 1) = frand(0, 1);
-
-	int sampleSize = featureSize;
-	float scale = 1.0f;
-
-	while (sampleSize > 1)
-	{
-		diamondSquare(sampleSize, scale);
-
-		sampleSize /= 2;
-		scale /= 2.0f;
-	}
-
-	init();
-}
-
-// read terrain from heightmap file
-void Terrain::readRaw(const std::string& filename)
-{
-	std::ifstream file;
-	file.open(filename, std::ios::_Nocreate | std::ios::binary);
-
-	if (!file.is_open())
-	{
-		std::cout << "Failed to open " << filename << std::endl;
-		return;
-	}
-
-	// read heights into buffer
-	for (int x = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++)
-		{
-			uint16_t currentHeight;
-
-			file.read(reinterpret_cast<char*>(&currentHeight), sizeof(uint16_t));
-			m_heights(x, m_gridSizeY - 1 - y) = (float)currentHeight;
-		}
-	}
-
-	// close file
-	file.close();
-
-	// initialize mesh
-	init();
-}
-
-// send data to the GPU
+// create mesh data
 void Terrain::init()
 {
 	// create vectors for vertices and indices
@@ -95,9 +41,9 @@ void Terrain::init()
 	std::vector<unsigned int> indices;
 
 	// generate mesh
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
+	for (unsigned int x = 0, i = 0; x < m_gridSizeX; x++)
 	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
+		for (unsigned int y = 0; y < m_gridSizeY; y++, i++)
 		{
 			Vertex currentVertex;
 
@@ -130,157 +76,5 @@ void Terrain::init()
 		}
 	}
 
-	// calculate vertex normals
-	for (int x = 0, i = 0; x < m_gridSizeX; x++)
-	{
-		for (int y = 0; y < m_gridSizeY; y++, i++)
-		{
-			verts[i].normal = glm::vec4(getVertexNormal(x, y), 1.0f);
-		}
-	}
-
-
-}
-
-// diamond square algorithm
-void Terrain::diamondSquare(int stepSize, float scale)
-{
-	int halfStep = stepSize / 2;
-
-	for (int y = halfStep; y < m_gridSizeY + halfStep; y += stepSize)
-	{
-		for (int x = halfStep; x < m_gridSizeX + halfStep; x += stepSize)
-		{
-			sampleSquare(x, y, stepSize, frand(-scale, scale));
-		}
-	}
-
-	for (int y = 0; y < m_gridSizeY; y += stepSize)
-	{
-		for (int x = 0; x < m_gridSizeX; x += stepSize)
-		{
-			sampleDiamond(x + halfStep, y, stepSize, frand(-scale, scale));
-			sampleDiamond(x, y + halfStep, stepSize, frand(-scale, scale));
-		}
-	}
-}
-
-void Terrain::sampleSquare(int x, int y, int size, float value)
-{
-	int hs = size / 2;
-
-	float a = sample(x - hs, y - hs);
-	float b = sample(x + hs, y - hs);
-	float c = sample(x - hs, y + hs);
-	float d = sample(x + hs, y + hs);
-
-	setSample(x, y, ((a + b + c + d) / 4.0f) + value);
-}
-
-void Terrain::sampleDiamond(int x, int y, int size, float value)
-{
-	int hs = size / 2;
-
-	float a = sample(x - hs, y);
-	float b = sample(x + hs, y);
-	float c = sample(x, y - hs);
-	float d = sample(x, y + hs);
-
-	setSample(x, y, ((a + b + c + d) / 4.0f) + value);
-}
-
-float Terrain::sample(int x, int y)
-{
-	return (m_heights(x & (m_gridSizeX - 1), y & (m_gridSizeY - 1)));
-}
-
-void Terrain::setSample(int x, int y, float value)
-{
-	m_heights(x & (m_gridSizeX - 1), y & (m_gridSizeY - 1)) = value;
-}
-
-// returns the normal of a vertex by averaging the normals of the surrounding faces
-glm::vec3 Terrain::getVertexNormal(int x, int y)
-{
-	//int i = y * m_gridSizeX + x;
-
-	//glm::vec3 normal = glm::vec3(0);
-
-	//// edge cases
-	//if (x == 0)
-	//{
-	//	if (y == 0)
-	//	{
-	//		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-	//		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-	//	}
-	//	else if (y == m_gridSizeY - 1)
-	//	{
-	//		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-	//	}
-	//	else
-	//	{
-	//		normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-	//		normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-	//		normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-	//	}
-	//}
-	//else if (x == m_gridSizeX - 1)
-	//{
-	//	if (y == 0)
-	//	{
-	//		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-	//	}
-	//	else if (y == m_gridSizeY - 1)
-	//	{
-	//		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-	//		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-	//	}
-	//	else
-	//	{
-	//		normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-	//		normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-	//		normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-	//	}
-	//}
-	//else if (y == 0)
-	//{
-	//	normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-	//	normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-	//	normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-	//}
-	//else if (y == m_gridSizeY - 1)
-	//{
-	//	normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-	//	normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-	//	normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-	//}
-	//else
-	//{
-	//	normal += getTriangleNormal(vertices[i - m_gridSizeX - 1].Position, vertices[i - m_gridSizeX].Position, vertices[i].Position);
-	//	normal += getTriangleNormal(vertices[i - m_gridSizeX].Position, vertices[i + 1].Position, vertices[i].Position);
-	//	normal += getTriangleNormal(vertices[i].Position, vertices[i + 1].Position, vertices[i + m_gridSizeX + 1].Position);
-	//	normal += getTriangleNormal(vertices[i + m_gridSizeX + 1].Position, vertices[i + m_gridSizeX].Position, vertices[i].Position);
-	//	normal += getTriangleNormal(vertices[i - 1].Position, vertices[i].Position, vertices[i + m_gridSizeX].Position);
-	//	normal += getTriangleNormal(vertices[i].Position, vertices[i - 1].Position, vertices[i - m_gridSizeX - 1].Position);
-	//}
-
-	//return glm::normalize(normal);
-	return glm::vec3(0, 1, 0);
-}
-
-// returns the normal direction of a triangle given 3 points
-glm::vec3 Terrain::getTriangleNormal(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
-{
-	// to find the normal of three points first take two of the edges
-	glm::vec3 edge1 = (p2 - p1);
-	glm::vec3 edge2 = (p3 - p1);
-
-	// then the cross product of these two edges will point perpendicular to the triangle
-	glm::vec3 normal = glm::cross(edge1, edge2);
-
-	// normalize to get the normal
-	normal = glm::normalize(normal);
-
-	return normal;
+	initialise(verts, &indices);
 }

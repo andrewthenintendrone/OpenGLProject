@@ -12,7 +12,7 @@ Time& Time::getInstance()
 void Time::update()
 {
 	// update deltaTime
-	m_currentFrame = glfwGetTime();
+	m_currentFrame = (float)glfwGetTime();
 	m_deltaTime = m_currentFrame - m_lastFrame;
 	m_lastFrame = m_currentFrame;
 

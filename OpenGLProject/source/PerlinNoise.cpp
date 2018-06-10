@@ -45,9 +45,9 @@ float PerlinNoise::perlin(float x, float y)
 	y = fmod(y, 255.0f);
 
 	// Determine grid cell coordinates
-	int x0 = floor(x);
+	int x0 = (int)floor(x);
 	int x1 = x0 + 1;
-	int y0 = floor(y);
+	int y0 = (int)floor(y);
 	int y1 = y0 + 1;
 
 	// Determine interpolation weights

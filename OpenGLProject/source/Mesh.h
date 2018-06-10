@@ -1,6 +1,6 @@
 #pragma once
 #include "Vertex.h"
-#include "Texture.h"
+#include "Material.h"
 #include "Shader.h"
 #include <vector>
 
@@ -11,7 +11,7 @@ public:
 	Mesh() {}
 	virtual ~Mesh();
 
-	void initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indices = nullptr, Texture* texture = nullptr);
+	void initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indices = nullptr);
 
 	void initialiseQuad();
 	void initialiseBox();
@@ -27,10 +27,12 @@ public:
 
 protected:
 
-	unsigned int vao, vbo, ibo;
+	unsigned int vao = 0;
+	unsigned int vbo = 0;
+	unsigned int ibo = 0;
 
 	std::vector<Vertex> m_verts;
 	std::vector<unsigned int> m_indices;
 
-	Texture m_texture;
+	Material m_material;
 };

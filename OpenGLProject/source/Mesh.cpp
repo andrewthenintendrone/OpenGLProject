@@ -18,7 +18,7 @@ Mesh::~Mesh()
 	glDeleteBuffers(1, &ibo);
 }
 
-void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indices, Texture* texture)
+void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indices)
 {
 	assert(vao == 0);
 
@@ -27,10 +27,6 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 	if (indices != nullptr)
 	{
 		m_indices = *indices;
-	}
-	if (texture != nullptr)
-	{
-		m_texture = *texture;
 	}
 
 	// generate buffers
@@ -49,15 +45,23 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 
 	// enable first element as position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
 	// enable second element as normal
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)sizeof(glm::vec4));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
 	// enable third element as texCoord
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 2));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
+
+	// enable fourth element as tangent
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+
+	// enable fifth element as color
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 5, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
 	// bind indices if there are any
 	if (m_indices.size() != 0)

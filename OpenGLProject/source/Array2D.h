@@ -2,12 +2,12 @@
 #include <vector>
 #include <iostream>
 
-template <class T>
+template<class T>
 class Array2D
 {
 public:
 
-	Array2D(unsigned int width = 1, unsigned int height = 1) : m_width(width), m_height(height)
+	Array2D(unsigned int width = 0, unsigned int height = 0) : m_width(width), m_height(height)
 	{
 		m_buffer.resize(m_width * m_height);
 	}
@@ -20,7 +20,7 @@ public:
 		}
 		else
 		{
-			std::cout << "Tried to access element " << x << "-" << y << " of a " << m_width << "-" << m_height << " array" << std::endl;
+			std::cout << "Tried to access element " << x << "-" << y << " of a " << m_width << "-" << m_height << "array" << std::endl;
 			return m_buffer.front();
 		}
 	}
@@ -33,10 +33,11 @@ public:
 		}
 		else
 		{
-			std::cout << "Tried to access element " << x << "-" << y << " of a " << m_width << "-" << m_height << " array" << std::endl;
+			std::cout << "Tried to access element " << x << "-" << y << " of a " << m_width << "-" << m_height << "array" << std::endl;
 			return m_buffer.front();
 		}
 	}
+
 
 private:
 

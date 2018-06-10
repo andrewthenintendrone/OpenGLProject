@@ -71,12 +71,13 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\deferred.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\deferred.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 	m_postProcessingShader = Shader((fs::current_path().string() + "\\resources\\shaders\\postprocessing.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\postprocessing.fs").c_str());
 
 	// generate mesh(es)
-	m_model.load((fs::current_path().string() + "\\resources\\objects\\kart\\kart.obj").c_str(), true, true);
+	m_model = Terrain(128, 128);
+	m_model.generatePerlin();
 	m_skybox.initialiseBox();
 	m_screenQuad.initialiseQuad();
 
@@ -97,10 +98,10 @@ void OpenGLApplication::setup()
 
 	m_camera.setPosition(glm::vec3(-10, 10, 10));
 
-	if (m_renderTarget.initialise(4, m_windowWidth, m_windowHeight) == 0)
+	/*if (m_renderTarget.initialise(4, m_windowWidth, m_windowHeight) == 0)
 	{
 		printf("Render Target Error\n");
-	}
+	}*/
 }
 
 void OpenGLApplication::run()
@@ -128,7 +129,7 @@ void OpenGLApplication::update()
 void OpenGLApplication::render()
 {
 	// bind our render target
-	m_renderTarget.bind();
+	//m_renderTarget.bind();
 
 	// clear the color and depth buffers
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -154,6 +155,7 @@ void OpenGLApplication::render()
 
 	// get model matrix
 	glm::mat4 model(1);
+	model = glm::scale(model, glm::vec3(1, 128, 1));
 	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
@@ -166,7 +168,7 @@ void OpenGLApplication::render()
 
 	m_shader.setFloat("time", time);
 
-	m_model.draw();
+	m_model.draw(m_shader);
 
 	// draw skybox last
 	glDepthFunc(GL_LEQUAL);
@@ -178,10 +180,10 @@ void OpenGLApplication::render()
 	glDepthFunc(GL_LESS);
 
 	// unbind target to return to backbuffer
-	m_renderTarget.unbind();
+	//m_renderTarget.unbind();
 
 	// render rendertarget onto screen quad
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_postProcessingShader.bind();
 	glm::mat4 dummyTransform(1);
 	m_postProcessingShader.setMat4("ProjectionViewModel", dummyTransform);
@@ -194,7 +196,7 @@ void OpenGLApplication::render()
 	m_renderTarget.getTarget(2).bind(2);
 	m_renderTarget.getTarget(3).bind(3);
 	m_postProcessingShader.setFloat("time", time);
-	m_screenQuad.draw(m_postProcessingShader);
+	m_screenQuad.draw(m_postProcessingShader);*/
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

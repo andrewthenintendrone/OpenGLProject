@@ -40,8 +40,6 @@ uniform float time;
 uniform vec3 cameraPosition;
 
 out vec4 FragColor;
-out vec4 FragNormals;
-out vec4 FragDepth;
 
 void main()
 {
@@ -66,7 +64,7 @@ void main()
 	float NdL = max(0, dot(N, L));
 	float NdE = max(0, dot(N, E));
 
-	float R2 = pow(material.roughness, 2.0);
+	float R2 = pow(specularTexture.r, 2.0);
 
 	// Oren-Nayar Diffuse Term
 	float A = 1.0 - 0.5 * R2 / (R2 + 0.33);
@@ -113,7 +111,5 @@ void main()
 	specular *= specularTexture;
 
 	// output final color
-	FragColor = vec4(ambient + diffuse + specular, 1) * 0.5;
-	FragNormals = vec4(N, 1.0);
-	FragDepth = vec4(vPosition.w);
+	FragColor = vec4(ambient + diffuse + specular, 1);
 }
