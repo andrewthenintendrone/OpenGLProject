@@ -143,6 +143,35 @@ void Texture::create(unsigned int width, unsigned int height, Format format, uns
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Texture::createDummy(Color color)
+{
+	if (m_glHandle != 0)
+	{
+		glDeleteTextures(1, &m_glHandle);
+		m_glHandle = 0;
+		m_filename = "none";
+	}
+
+	m_width = 1;
+	m_height = 1;
+	m_format = RGBA;
+
+	glGenTextures(1, &m_glHandle);
+	glBindTexture(GL_TEXTURE_2D, m_glHandle);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	unsigned char pixels[4] { color.r, color.g, color.b, color.a };
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Texture::bind(unsigned int slot) const
 {
 	glActiveTexture(GL_TEXTURE0 + slot);

@@ -5,6 +5,8 @@ in vec4 vPosition;
 in mat3 TBN;
 in vec2 vTexCoords;
 
+uniform samplerCube skybox;
+
 struct Material
 {
 	vec3 ambient;
@@ -21,7 +23,6 @@ struct Material
 
 uniform Material material;
 uniform vec3 cameraPosition;
-uniform samplerCube skybox;
 
 out vec4 FragColor;
 
@@ -36,11 +37,14 @@ void main()
 	vec3 I = normalize(vPosition.xyz - cameraPosition);
 
 	// reflect
-	//vec3 R = reflect(I, normalize(N));
+	vec3 R = reflect(I, normalize(N));
 
 	// refract
-	vec3 R = refract(I, normalize(N), ratio);
+	//vec3 R = refract(I, normalize(N), ratio);
+
+	// sample skybox
+	vec3 skyColor = texture(skybox, R).rgb;
 
 	// output final color
-	FragColor = vec4(texture(skybox, R).rgb * vec3(0.8, 0.8, 1.0), 1);
+	FragColor = vec4(skyColor, 1);
 }

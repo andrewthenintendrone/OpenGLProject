@@ -9,6 +9,7 @@ layout(location = 4) in vec4 Color;
 out vec4 vPosition;
 out mat3 TBN;
 out vec2 vTexCoords;
+out vec4 vColor;
 
 uniform mat4 ProjectionViewModel;
 
@@ -30,5 +31,7 @@ void main()
 	TBN = mat3(T, B, N);
 	
 	vTexCoords = TexCoords;
+	vColor = Color;
+
 	gl_Position = ProjectionViewModel * Position;
 }

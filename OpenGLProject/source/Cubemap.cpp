@@ -63,6 +63,8 @@ void Cubemap::load(std::vector<std::string> filenames)
 			// transfer texture data to gpu
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
+			glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+
 			// free image data (it is already on the GPU)
 			stbi_image_free(data);
 		}
@@ -81,4 +83,10 @@ void Cubemap::load(std::vector<std::string> filenames)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void Cubemap::bind(unsigned int slot) const
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 }

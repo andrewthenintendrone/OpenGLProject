@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Color.h"
 
 class Texture
 {
@@ -21,6 +22,8 @@ public:
 	bool load(const char* filename);
 
 	void create(unsigned int width, unsigned int height, Format format, unsigned char* pixels = nullptr);
+
+	void createDummy(Color color);
 
 	const std::string& getFilename() const { return m_filename; }
 

@@ -1,12 +1,15 @@
-// classic Phong vertex shader
+// phong shader
 #version 430
 layout(location = 0) in vec4 Position;
 layout(location = 1) in vec4 Normal;
 layout(location = 2) in vec2 TexCoords;
+layout(location = 3) in vec4 Tangent;
+layout(location = 4) in vec4 Color;
 
 out vec4 vPosition;
-out vec3 vNormal;
+out mat3 TBN;
 out vec2 vTexCoords;
+out vec4 vColor;
 
 uniform mat4 ProjectionViewModel;
 
@@ -19,7 +22,16 @@ uniform mat3 NormalMatrix;
 void main()
 {
 	vPosition = ModelMatrix * Position;
-	vNormal = NormalMatrix * Normal.xyz;
+	
+	// calculate TBN in vertex shader for efficiency
+	vec3 N = normalize(NormalMatrix * Normal.xyz);
+	vec3 T = normalize(NormalMatrix * Tangent.xyz);
+	vec3 B = cross(N, T) * Tangent.w;
+
+	TBN = mat3(T, B, N);
+
 	vTexCoords = TexCoords;
+	vColor = Color;
+
 	gl_Position = ProjectionViewModel * Position;
 }

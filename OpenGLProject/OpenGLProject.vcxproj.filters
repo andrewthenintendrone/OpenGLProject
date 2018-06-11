@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\structs">
+      <UniqueIdentifier>{c8393b14-c739-4df2-886d-698e34e292fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -86,12 +89,6 @@
     <ClInclude Include="source\Texture.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Vertex.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Color.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\OBJMesh.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -102,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Time.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Light.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\FlyCamera.h">
@@ -121,6 +115,15 @@
     </ClInclude>
     <ClInclude Include="source\Array2D.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Color.h">
+      <Filter>Source Files\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Light.h">
+      <Filter>Source Files\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Vertex.h">
+      <Filter>Source Files\structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

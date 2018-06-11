@@ -13,6 +13,10 @@ public:
 
 	void generatePerlin();
 
+	void readRaw(const std::string& filename);
+
+	void generateRandom();
+
 private:
 
 	// number of vertices along the x and y axis
@@ -20,6 +24,8 @@ private:
 	unsigned int m_gridSizeY;
 
 	Array2D<float> m_heights;
+
+	glm::vec3 getTriangleDirection(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3);
 
 	void init();
 };

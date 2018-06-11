@@ -7,6 +7,7 @@ const float pi = 3.1415926535897932384626433832;
 in vec4 vPosition;
 in mat3 TBN;
 in vec2 vTexCoords;
+in vec4 vColor;
 
 struct Light
 {
@@ -47,7 +48,7 @@ void main()
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
-	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb * material.emissive;
+	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb;
 
 	// tangent space normals
 	//vec3 N = TBN * (normalTexture * 2 - 1);

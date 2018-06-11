@@ -57,7 +57,7 @@ private:
 	Cubemap m_cubemap;
 
 	// Mesh(es)
-	Terrain m_model;
+	Mesh m_model;
 
 	// RenderTarget(s)
 	RenderTarget m_renderTarget;

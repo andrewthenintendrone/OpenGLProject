@@ -25,6 +25,8 @@ public:
 	const unsigned int getVertexBufferObject() { return vbo; }
 	const unsigned int getIndexBufferObject() { return ibo; }
 
+	Material& material() { return m_material; }
+
 protected:
 
 	unsigned int vao = 0;

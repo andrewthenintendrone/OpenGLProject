@@ -71,24 +71,29 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// build and compile shader(s)
-	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
+	m_shader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
 	m_skyShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 	m_postProcessingShader = Shader((fs::current_path().string() + "\\resources\\shaders\\postprocessing.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\postprocessing.fs").c_str());
 
 	// generate mesh(es)
-	m_model = Terrain(128, 128);
-	m_model.generatePerlin();
+	m_model.initialiseSphere(32.0f, 32, 64);
+
+	m_model.material().ambient = Color::Purple().asVec3() * 0.25f;
+	m_model.material().diffuse = Color::Purple().asVec3();
+	m_model.material().specular = Color::White().asVec3();
+	m_model.material().specularPower = 128.0f;
+
 	m_skybox.initialiseBox();
 	m_screenQuad.initialiseQuad();
 
 	// load skybox textures
 	std::vector<std::string> skyboxTextures;
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\right.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\left.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\up.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\down.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\front.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\mp_sorbin\\back.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\right.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\left.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\up.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\down.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\front.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sb_strato\\back.tga");
 	m_cubemap.load(skyboxTextures);
 
 	// set up light
@@ -138,7 +143,7 @@ void OpenGLApplication::render()
 	// enable shader
 	m_shader.bind();
 
-	float time = glfwGetTime();
+	float time = (float)glfwGetTime();
 
 	// update light
 	m_light.position = glm::vec3(glm::cos(time * 2) * 100,
@@ -151,11 +156,14 @@ void OpenGLApplication::render()
 	// send camera position
 	m_shader.setVec3("cameraPosition", m_camera.getPosition());
 
-	m_shader.setInt("skybox", 0);
+	// enable skybox
+	m_shader.setInt("skybox", 18);
+	m_cubemap.bind(18);
 
 	// get model matrix
 	glm::mat4 model(1);
-	model = glm::scale(model, glm::vec3(1, 128, 1));
+	//model = glm::scale(model, glm::vec3(1, 1, 1));
+	//model = glm::rotate(model, glm::radians(std::sin(time * 30.0f) * 45.0f), glm::vec3(0, 1, 0));
 	m_shader.setMat4("ModelMatrix", model);
 
 	// combine matrices
@@ -254,9 +262,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		app->m_lastMousePos = glm::vec2(xpos, ypos);
 	}
 
-	float xoffset = xpos - app->m_lastMousePos.x;
+	float xoffset = (float)xpos - app->m_lastMousePos.x;
 	// y position goes from bottom to top
-	float yoffset = app->m_lastMousePos.y - ypos;
+	float yoffset = app->m_lastMousePos.y - (float)ypos;
 
 	// store the last mouse position
 	app->m_lastMousePos = glm::vec2(xpos, ypos);

@@ -14,15 +14,18 @@ struct Material
 	glm::vec3 specular; // specular color
 	glm::vec3 emissive; // emissive color
 
-	float specularPower;
-	float opacity;
+	float specularPower; // specular power (for phong lighting)
+	float opacity; // opacity (not implemented)
+
+	float roughness; // roughness (for physically based lighting)
+	float reflectionCoefficient; // reflection coefficient (for physically based lighting)
 
 	// textures
-	Texture diffuseTexture; // bound slot 0
-	Texture alphaTexture; // bound slot 1
-	Texture ambientTexture; // bound slot 2
-	Texture specularTexture; // bound slot 3
-	Texture specularHighlightTexture; // bound slot 4
-	Texture normalTexture; // bound slot 5
-	Texture displacementTexture; // bound slot 6
+	Texture diffuseTexture; // 0
+	Texture alphaTexture; // 1
+	Texture ambientTexture; // 2
+	Texture specularTexture; // 3
+	Texture specularHighlightTexture; // 4
+	Texture normalTexture; // 5
+	Texture displacementTexture; // 6
 };

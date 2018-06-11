@@ -76,6 +76,14 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 			m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 	}
 
+	// create dummy textures for material
+	m_material.diffuseTexture.createDummy(Color::White());
+	m_material.alphaTexture.createDummy(Color::White());
+	m_material.ambientTexture.createDummy(Color::White());
+	m_material.specularTexture.createDummy(Color::White());
+	m_material.normalTexture.createDummy(Color(128, 128, 255, 255));
+	m_material.displacementTexture.createDummy(Color::Black());
+
 	// unbind buffers
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -127,6 +135,7 @@ void Mesh::initialiseBox()
 	// normals
 	for (int i = 0; i < 8; i++)
 	{
+		verts[i].texcoord = glm::vec2(0, 0);
 		verts[i].normal = verts[i].position;
 		verts[i].normal.w = 0;
 	}
@@ -297,6 +306,7 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 			v.position = glm::vec4(v4Point, 1);
 			v.normal = glm::vec4(v4Normal, 1);
 			v.texcoord = glm::vec2(yRatio, -xRatio);
+			v.tangent = glm::vec4(glm::cross(glm::vec3(0, 1, 0), glm::vec3(v4Normal)), 0);
 
 			//verts[index] = v;
 			verts.push_back(v);
@@ -321,6 +331,41 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 
 void Mesh::draw(Shader shader)
 {
+	// set uniforms
+	shader.setVec3("material.ambient", m_material.ambient);
+	shader.setVec3("material.diffuse", m_material.diffuse);
+	shader.setVec3("material.specular", m_material.specular);
+	shader.setVec3("material.emissive", m_material.emissive);
+	
+	shader.setFloat("material.specularPower", m_material.specularPower);
+	shader.setFloat("material.opacity", m_material.opacity);
+
+	shader.setFloat("material.roughness", m_material.roughness);
+	shader.setFloat("material.reflectionCoefficient", m_material.roughness);
+
+	shader.setInt("material.diffuseTexture", 0);
+	shader.setInt("material.alphaTexture", 1);
+	shader.setInt("material.ambientTexture", 2);
+	shader.setInt("material.specularTexture", 3);
+	shader.setInt("material.specularHighlightTexture", 4);
+	shader.setInt("material.normalTexture", 5);
+	shader.setInt("material.displacementTexture", 6);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_material.diffuseTexture.getHandle());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_material.alphaTexture.getHandle());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_material.ambientTexture.getHandle());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_material.specularTexture.getHandle());
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_material.specularHighlightTexture.getHandle());
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_material.normalTexture.getHandle());
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, m_material.displacementTexture.getHandle());
+
 	glBindVertexArray(vao);
 
 	// using indices or just vertices
