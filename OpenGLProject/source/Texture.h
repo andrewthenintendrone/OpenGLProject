@@ -1,27 +1,20 @@
 #pragma once
 #include <string>
 #include "Color.h"
+#include <glad\glad.h>
 
 class Texture
 {
 public:
 
-	enum Format : unsigned int
-	{
-		RED = 1,
-		RG,
-		RGB,
-		RGBA
-	};
-
-	Texture();
+	Texture() {};
 	Texture(const char* filename);
-	Texture(unsigned int width, unsigned int height, Format format, unsigned char* pixels = nullptr);
+	Texture(unsigned int width, unsigned int height, GLenum format, unsigned char* pixels = nullptr);
 	virtual ~Texture();
 
 	bool load(const char* filename);
 
-	void create(unsigned int width, unsigned int height, Format format, unsigned char* pixels = nullptr);
+	void create(unsigned int width, unsigned int height, GLenum format, unsigned char* pixels = nullptr);
 
 	void createDummy(Color color);
 
@@ -37,10 +30,10 @@ public:
 
 protected:
 
-	std::string m_filename;
-	unsigned int m_width;
-	unsigned int m_height;
-	unsigned int m_glHandle;
-	unsigned int m_format;
-	unsigned char* m_loadedPixels;
+	std::string m_filename = "none";
+	unsigned int m_width = 0;
+	unsigned int m_height = 0;
+	unsigned int m_glHandle = 0;
+	unsigned int m_format = 0;
+	unsigned char* m_loadedPixels = nullptr;
 };

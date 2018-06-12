@@ -77,73 +77,133 @@ void Shader::bind()
 // set a boolean in the shader
 const void Shader::setBool(const std::string& name, bool value)
 {
-	glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform1i(uniformLocation, (int)value);
+	}
 }
 
 // set an int in the shader
 const void Shader::setInt(const std::string& name, int value)
 {
-	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform1i(uniformLocation, value);
+	}
 }
 
 // set a float value in the shader
 const void Shader::setFloat(const std::string& name, float value)
 {
-	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform1f(uniformLocation, value);
+	}
 }
 
 // set a vector 2 in the shader
 const void Shader::setVec2(const std::string& name, const glm::vec2& value)
 {
-	glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform2fv(uniformLocation, 1, &value[0]);
+	}
 }
 
 // set a vector2 in the shader
 const void Shader::setVec2(const std::string& name, float x, float y)
 {
-	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform2f(uniformLocation, x, y);
+	}
 }
 
 // set a vector3 in the shader
 const void Shader::setVec3(const std::string& name, const glm::vec3& value)
 {
-	glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform3fv(uniformLocation, 1, &value[0]);
+	}
 }
 
 // set a vector4 in the shader
 const void Shader::setVec3(const std::string& name, float x, float y, float z)
 {
-	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform3f(uniformLocation, x, y, z);
+	}
 }
 
 // set a vector4 in the shader
 const void Shader::setVec4(const std::string& name, const glm::vec4& value)
 {
-	glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform4fv(uniformLocation, 1, &value[0]);
+	}
 }
 
 // set a vector4 in the shader
 const void Shader::setVec4(const std::string& name, float x, float y, float z, float w)
 {
-	glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniform4f(uniformLocation, x, y, z, w);
+	}
 }
 
 // set a matrix2 in the shader
 const void Shader::setMat2(const std::string& name, const glm::mat2& mat)
 {
-	glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniformMatrix2fv(uniformLocation, 1, GL_FALSE, &mat[0][0]);
+	}
 }
 
 // set a matrix3 in the shader
 const void Shader::setMat3(const std::string& name, const glm::mat3& mat)
 {
-	glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, &mat[0][0]);
+	}
 }
 
 // set a matrix4 in the shader
 const void Shader::setMat4(const std::string& name, const glm::mat4& mat)
 {
-	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	GLint uniformLocation = glGetUniformLocation(ID, name.c_str());
+
+	if (uniformLocation >= 0)
+	{
+		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, &mat[0][0]);
+	}
 }
 
 // outputs any shader compile errors to the console

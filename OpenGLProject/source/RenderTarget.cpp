@@ -22,7 +22,7 @@ bool RenderTarget::initialise(unsigned int targetCount, unsigned int width, unsi
 
 		for (unsigned int i = 0; i < targetCount; i++)
 		{
-			m_targets[i].create(width, height, Texture::RGBA);
+			m_targets[i].create(width, height, GL_RGBA);
 
 			drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 

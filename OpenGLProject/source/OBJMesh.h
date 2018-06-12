@@ -5,6 +5,7 @@
 #include "Vertex.h"
 #include "Material.h"
 #include "MeshChunk.h"
+#include "Shader.h"
 
 class OBJMesh
 {
@@ -16,7 +17,7 @@ public:
 
 	bool load(const std::string& filename, bool loadTextures = true, bool flipTextureV = false);
 
-	void draw(bool usePatches = false);
+	void draw(Shader shader, bool usePatches = false);
 
 	const std::string& getFilename() const { return m_filename; }
 

@@ -6,7 +6,8 @@ in mat3 TBN;
 in vec2 vTexCoords;
 in vec4 vColor;
 
-struct Light
+// point light
+struct PointLight
 {
 	vec3 position;
 	
@@ -14,7 +15,18 @@ struct Light
 	vec3 diffuse;
 	vec3 specular;
 };
-uniform Light light;
+uniform PointLight pointLight;
+
+// directional light
+struct DirectionalLight
+{
+	vec3 direction;
+	
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+uniform DirectionalLight directionalLight;
 
 struct Material
 {
@@ -41,10 +53,18 @@ uniform Material material;
 
 uniform vec3 cameraPosition;
 
+uniform samplerCube skybox;
+
 out vec4 FragColor;
 
 void main()
 {
+	// transparency
+	if(texture(material.diffuseTexture, vTexCoords).a < 0.1)
+	{
+		discard;
+	}
+
 	// sample textures
 	vec3 ambientTexture = texture(material.ambientTexture, vTexCoords).rgb;
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
@@ -53,22 +73,21 @@ void main()
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 
 	// ambient lightning
-	vec3 ambient = light.ambient * material.ambient * ambientTexture;
+	vec3 ambient = directionalLight.ambient * material.ambient * ambientTexture;
 
 	// use normals
 	vec3 N = TBN[2];
 
 	// diffuse lighting
-	vec3 L = normalize(vPosition.xyz - light.position);
+	vec3 L = normalize(directionalLight.direction);
 	float lambertTerm = max(0, min(1, dot(N, -L)));
-	vec3 diffuse = light.diffuse * material.diffuse * lambertTerm;
+	vec3 diffuse = directionalLight.diffuse * material.diffuse * lambertTerm * diffuseTexture;
 
 	// specular lighting
 	vec3 V = normalize(cameraPosition - vPosition.xyz);
 	vec3 R = reflect(L, N);
 	float specularTerm = pow(max(0, dot(R, V)), material.specularPower);
-	vec3 specular = light.specular * material.specular * specularTerm;
-	
-	// output final color
-	FragColor = vec4(ambient + diffuse + specular, 1);
+	vec3 specular = directionalLight.specular * material.specular * specularTerm * specularTexture;
+
+	FragColor = vec4(ambient + diffuse + specular, 1.0);
 }

@@ -10,7 +10,6 @@
 #include "FlyCamera.h"
 #include "Light.h"
 #include "Mesh.h"
-#include "Terrain.h"
 #include "OBJMesh.h"
 #include "Cubemap.h"
 #include "RenderTarget.h"
@@ -45,21 +44,19 @@ private:
 	unsigned int m_windowHeight;
 
 	// Shader(s)
-	Shader m_shader;
-	Shader m_skyShader;
-	Shader m_postProcessingShader;
+	Shader m_phongShader;
 
 	// Light(s)
-	PointLight m_light;
+	DirectionalLight m_directionalLight;
+	PointLight m_pointLight;
 
-	// cubemap
-	Mesh m_skybox;
-	Cubemap m_cubemap;
+	// skybox
+	Mesh m_skybox; // skybox cube
+	Shader m_skyboxShader; // skybox shader
+	Cubemap m_cubemap; // skybox cubemap texture
 
 	// Mesh(es)
-	Mesh m_model;
-
-	// RenderTarget(s)
-	RenderTarget m_renderTarget;
-	Mesh m_screenQuad;
+	Mesh m_proceduralMesh; // procedural mesh
+	OBJMesh m_characterMesh; // character mesh
+	OBJMesh m_spearMesh; // soulspear mesh
 };

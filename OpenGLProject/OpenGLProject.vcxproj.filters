@@ -92,9 +92,6 @@
     <ClInclude Include="source\OBJMesh.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Material.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\MeshChunk.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -123,6 +120,9 @@
       <Filter>Source Files\structs</Filter>
     </ClInclude>
     <ClInclude Include="source\Vertex.h">
+      <Filter>Source Files\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Material.h">
       <Filter>Source Files\structs</Filter>
     </ClInclude>
   </ItemGroup>

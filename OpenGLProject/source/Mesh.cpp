@@ -76,13 +76,7 @@ void Mesh::initialise(std::vector<Vertex> verts, std::vector<unsigned int>* indi
 			m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 	}
 
-	// create dummy textures for material
-	m_material.diffuseTexture.createDummy(Color::White());
-	m_material.alphaTexture.createDummy(Color::White());
-	m_material.ambientTexture.createDummy(Color::White());
-	m_material.specularTexture.createDummy(Color::White());
-	m_material.normalTexture.createDummy(Color(128, 128, 255, 255));
-	m_material.displacementTexture.createDummy(Color::Black());
+	m_material.createDummyTextures();
 
 	// unbind buffers
 	glBindVertexArray(0);
@@ -299,7 +293,7 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 			float yRatio = float(col) * invColumns;
 			float theta = glm::radians(yRatio * 360.0f);
 			glm::vec3 v4Point(-z * sinf(theta), y, -z * cosf(theta));
-			glm::vec3 v4Normal(invRadius * v4Point);
+			glm::vec3 v4Normal(glm::normalize(v4Point));
 
 			// create vertex
 			Vertex v;
@@ -313,7 +307,7 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 		}
 	}
 
-	for (int i = 0; i < verts.size() - columns - 1; i++)
+	for (unsigned int i = 0; i < verts.size() - columns - 1; i++)
 	{
 		int i2 = i + 1;
 
@@ -339,10 +333,10 @@ void Mesh::draw(Shader shader)
 	
 	shader.setFloat("material.specularPower", m_material.specularPower);
 	shader.setFloat("material.opacity", m_material.opacity);
-
 	shader.setFloat("material.roughness", m_material.roughness);
-	shader.setFloat("material.reflectionCoefficient", m_material.roughness);
+	shader.setFloat("material.reflectionCoefficient", m_material.reflectionCoefficient);
 
+	// set textures
 	shader.setInt("material.diffuseTexture", 0);
 	shader.setInt("material.alphaTexture", 1);
 	shader.setInt("material.ambientTexture", 2);
@@ -351,20 +345,13 @@ void Mesh::draw(Shader shader)
 	shader.setInt("material.normalTexture", 5);
 	shader.setInt("material.displacementTexture", 6);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_material.diffuseTexture.getHandle());
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_material.alphaTexture.getHandle());
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_material.ambientTexture.getHandle());
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_material.specularTexture.getHandle());
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_material.specularHighlightTexture.getHandle());
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, m_material.normalTexture.getHandle());
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, m_material.displacementTexture.getHandle());
+	m_material.diffuseTexture.bind(0);
+	m_material.alphaTexture.bind(1);
+	m_material.ambientTexture.bind(2);
+	m_material.specularTexture.bind(3);
+	m_material.specularHighlightTexture.bind(4);
+	m_material.normalTexture.bind(5);
+	m_material.alphaTexture.bind(6);
 
 	glBindVertexArray(vao);
 

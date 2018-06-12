@@ -66,37 +66,37 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 		{
 			unsigned char pixels[4] { 255, 255, 255, 255 };
 
-			m_materials[index].alphaTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].alphaTexture.create(1, 1, GL_RGBA, pixels);
 		}
 		if (!m_materials[index].ambientTexture.load((folder + m.ambient_texname).c_str()))
 		{
 			unsigned char pixels[4]{ 255, 255, 255, 255 };
 
-			m_materials[index].ambientTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].ambientTexture.create(1, 1, GL_RGBA, pixels);
 		}
 		if (!m_materials[index].diffuseTexture.load((folder + m.diffuse_texname).c_str()))
 		{
 			unsigned char pixels[4]{ 255, 255, 255, 255 };
 
-			m_materials[index].diffuseTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].diffuseTexture.create(1, 1, GL_RGBA, pixels);
 		}
 		if (!m_materials[index].specularTexture.load((folder + m.specular_texname).c_str()))
 		{
 			unsigned char pixels[4]{ 255, 255, 255, 255 };
 
-			m_materials[index].specularTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].specularTexture.create(1, 1, GL_RGBA, pixels);
 		}
 		if (!m_materials[index].normalTexture.load((folder + m.bump_texname).c_str()))
 		{
 			unsigned char pixels[4]{ 128, 128, 255, 255 };
 
-			m_materials[index].normalTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].normalTexture.create(1, 1, GL_RGBA, pixels);
 		}
 		if (!m_materials[index].displacementTexture.load((folder + m.displacement_texname).c_str()))
 		{
 			unsigned char pixels[4]{ 0, 0, 0, 255 };
 
-			m_materials[index].displacementTexture.create(1, 1, Texture::Format::RGBA, pixels);
+			m_materials[index].displacementTexture.create(1, 1, GL_RGBA, pixels);
 		}
 
 		index++;
@@ -200,48 +200,16 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 }
 
 // draw mesh
-void OBJMesh::draw(bool usePatches)
+void OBJMesh::draw(Shader shader, bool usePatches)
 {
-	int program = -1;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &program);
-
-	if (program == -1)
-	{
-		printf("No shader bound!\n");
-		return;
-	}
-
-	// pull uniforms from the shader
-	int kaUniform = glGetUniformLocation(program, "material.ambient");
-	int kdUniform = glGetUniformLocation(program, "material.diffuse");
-	int ksUniform = glGetUniformLocation(program, "material.specular");
-	int keUniform = glGetUniformLocation(program, "material.emissive");
-	int opacityUniform = glGetUniformLocation(program, "opacity");
-	int specPowUniform = glGetUniformLocation(program, "material.specularPower");
-
-	int alphaTexUniform = glGetUniformLocation(program, "material.alphaTexture");
-	int ambientTexUniform = glGetUniformLocation(program, "material.ambientTexture");
-	int diffuseTexUniform = glGetUniformLocation(program, "material.diffuseTexture");
-	int specTexUniform = glGetUniformLocation(program, "material.specularTexture");
-	int specHighlightTexUniform = glGetUniformLocation(program, "material.specularHighlightTexture");
-	int normalTexUniform = glGetUniformLocation(program, "material.normalTexture");
-	int dispTexUniform = glGetUniformLocation(program, "material.displacementTexture");
-
 	// set texture slots (these don't change per material)
-	if (diffuseTexUniform >= 0)
-		glUniform1i(diffuseTexUniform, 0);
-	if (alphaTexUniform >= 0)
-		glUniform1i(alphaTexUniform, 1);
-	if (ambientTexUniform >= 0)
-		glUniform1i(ambientTexUniform, 2);
-	if (specTexUniform >= 0)
-		glUniform1i(specTexUniform, 3);
-	if (specHighlightTexUniform >= 0)
-		glUniform1i(specTexUniform, 4);
-	if (normalTexUniform >= 0)
-		glUniform1i(normalTexUniform, 5);
-	if (dispTexUniform >= 0)
-		glUniform1i(alphaTexUniform, 6);
+	shader.setInt("material.diffuseTexture", 0);
+	shader.setInt("material.alphaTexture", 1);
+	shader.setInt("material.ambientTexture", 2);
+	shader.setInt("material.specularTexture", 3);
+	shader.setInt("material.specularHighlightTexture", 4);
+	shader.setInt("material.normalTexture", 5);
+	shader.setInt("material.alphaTexture", 6);
 
 	int currentMaterial = -1;
 
@@ -252,60 +220,25 @@ void OBJMesh::draw(bool usePatches)
 		if (currentMaterial != c.materialID)
 		{
 			currentMaterial = c.materialID;
-			if (kaUniform >= 0)
-				glUniform3fv(kaUniform, 1, &m_materials[currentMaterial].ambient[0]);
-			if (kdUniform >= 0)
-				glUniform3fv(kdUniform, 1, &m_materials[currentMaterial].diffuse[0]);
-			if (ksUniform >= 0)
-				glUniform3fv(ksUniform, 1, &m_materials[currentMaterial].specular[0]);
-			if (keUniform >= 0)
-				glUniform3fv(keUniform, 1, &m_materials[currentMaterial].emissive[0]);
-			if (opacityUniform >= 0)
-				glUniform1f(opacityUniform, m_materials[currentMaterial].opacity);
-			if (specPowUniform >= 0)
-				glUniform1f(specPowUniform, m_materials[currentMaterial].specularPower);
 
-			glActiveTexture(GL_TEXTURE0);
-			if (m_materials[currentMaterial].diffuseTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].diffuseTexture.getHandle());
-			else if (diffuseTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
+			shader.setVec3("material.ambient", m_materials[currentMaterial].ambient);
+			shader.setVec3("material.diffuse", m_materials[currentMaterial].diffuse);
+			shader.setVec3("material.specular", m_materials[currentMaterial].specular);
+			shader.setVec3("material.emissive", m_materials[currentMaterial].emissive);
 
-			glActiveTexture(GL_TEXTURE1);
-			if (m_materials[currentMaterial].alphaTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].alphaTexture.getHandle());
-			else if (alphaTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
+			shader.setFloat("material.opacity", m_materials[currentMaterial].opacity);
+			shader.setFloat("material.specularPower", m_materials[currentMaterial].specularPower);
 
-			glActiveTexture(GL_TEXTURE2);
-			if (m_materials[currentMaterial].ambientTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].ambientTexture.getHandle());
-			else if (ambientTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
+			shader.setFloat("material.roughness", m_materials[currentMaterial].roughness);
+			shader.setFloat("material.reflectionCoefficiant", m_materials[currentMaterial].reflectionCoefficient);
 
-			glActiveTexture(GL_TEXTURE3);
-			if (m_materials[currentMaterial].specularTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].specularTexture.getHandle());
-			else if (specTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-			glActiveTexture(GL_TEXTURE4);
-			if (m_materials[currentMaterial].specularHighlightTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].specularHighlightTexture.getHandle());
-			else if (specHighlightTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-			glActiveTexture(GL_TEXTURE5);
-			if (m_materials[currentMaterial].normalTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].normalTexture.getHandle());
-			else if (normalTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-			glActiveTexture(GL_TEXTURE6);
-			if (m_materials[currentMaterial].displacementTexture.getHandle() > 0)
-				glBindTexture(GL_TEXTURE_2D, m_materials[currentMaterial].displacementTexture.getHandle());
-			else if (dispTexUniform >= 0)
-				glBindTexture(GL_TEXTURE_2D, 0);
+			m_materials[currentMaterial].diffuseTexture.bind(0);
+			m_materials[currentMaterial].alphaTexture.bind(1);
+			m_materials[currentMaterial].ambientTexture.bind(2);
+			m_materials[currentMaterial].specularTexture.bind(3);
+			m_materials[currentMaterial].specularHighlightTexture.bind(4);
+			m_materials[currentMaterial].normalTexture.bind(5);
+			m_materials[currentMaterial].alphaTexture.bind(6);
 		}
 
 		// bind and draw geometry
