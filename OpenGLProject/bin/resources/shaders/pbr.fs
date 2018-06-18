@@ -9,15 +9,15 @@ in mat3 TBN;
 in vec2 vTexCoords;
 in vec4 vColor;
 
-struct Light
+struct DirectionalLight
 {
-	vec3 position;
+	vec3 direction;
 	
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
 };
-uniform Light light;
+uniform DirectionalLight directionalLight;
 
 struct Material
 {
@@ -29,6 +29,7 @@ struct Material
 	float roughness;
 	float reflectionCoefficient;
 
+	sampler2D ambientTexture;
 	sampler2D diffuseTexture;
 	sampler2D specularTexture;
 	sampler2D normalTexture;
@@ -45,20 +46,20 @@ out vec4 FragColor;
 void main()
 {
 	// sample textures
+	vec3 ambientTexture = texture(material.ambientTexture, vTexCoords).rgb;
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb;
 
 	// tangent space normals
-	//vec3 N = TBN * (normalTexture * 2 - 1);
-	vec3 N = TBN[2];
-	vec3 L = normalize(light.position - vPosition.xyz);
+	vec3 N = TBN * (normalTexture * 2 - 1);
+	vec3 L = normalize(-directionalLight.direction);
 	vec3 E = normalize(cameraPosition - vPosition.xyz);
 	vec3 H = normalize(L + E);
 
 	// ambient lightning
-	vec3 ambient = light.ambient * material.ambient;
+	vec3 ambient = directionalLight.ambient * material.ambient;
 
 	// diffuse lighting
 
@@ -84,7 +85,7 @@ void main()
 	// Calculate Oren-Nayar, replaces the Phong Lambert Term
 	float OrenNayar = NdL * (A + B * CX * DX);
 
-	vec3 diffuse = light.diffuse * material.diffuse * OrenNayar;
+	vec3 diffuse = directionalLight.diffuse * material.diffuse * OrenNayar;
 
 	// specular lighting
 	float NdH = max(0, dot(N, H));
@@ -104,10 +105,10 @@ void main()
 	// Calculate Cook-Torrance
 	float CookTorrance = max((D * G * F) / (NdE * pi), 0.0);
 
-	vec3 specular = light.specular * material.specular * CookTorrance;
+	vec3 specular = directionalLight.specular * material.specular * CookTorrance;
 
 	// multiply by textures
-	ambient *= diffuseTexture;
+	ambient *= ambientTexture;
 	diffuse *= diffuseTexture;
 	specular *= specularTexture;
 

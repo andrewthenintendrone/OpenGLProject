@@ -20,12 +20,12 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	// initialise glfw
 	glfwInit();
 
-	// tell glfw we will be using OpenGL 4.3 core
+	// tell glfw we will be using OpenGL version 4.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// create window
+	// create window using glfw
 	m_window = glfwCreateWindow(width, height, windowTitle, NULL, NULL);
 
 	// check that the window was created sucessfully
@@ -35,6 +35,7 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 		glfwTerminate();
 		return;
 	}
+
 	glfwMakeContextCurrent(m_window);
 
 	// store a pointer to this instance of OpenGLApplication within the window
@@ -55,11 +56,11 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 		return;
 	}
 
-	// enable z buffer
+	// enable the z buffer
 	glEnable(GL_DEPTH_TEST);
+
 	// enable front face culling
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	// set Input window pointer
 	Input::getInstance().setWindowPointer(m_window);
@@ -68,9 +69,10 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	setup();
 }
 
+// load and create all the various assets needed
 void OpenGLApplication::setup()
 {
-	// build and compile shader(s)
+	// load and compile shaders
 	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
@@ -79,22 +81,21 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().ambient = Color::White().asVec3();
 	m_proceduralMesh.material().diffuse = Color::White().asVec3();
 	m_proceduralMesh.material().specular = Color::White().asVec3();
+	m_proceduralMesh.material().roughness = 0.5f;
+	m_proceduralMesh.material().reflectionCoefficient = 0.5f;
 
+	// apply textures to the procedural mesh
 	m_proceduralMesh.material().diffuseTexture.load((fs::current_path().string() + "\\resources\\textures\\earth.jpg").c_str());
 	m_proceduralMesh.material().ambientTexture.load((fs::current_path().string() + "\\resources\\textures\\earth_night.jpg").c_str());
 	m_proceduralMesh.material().specularTexture.load((fs::current_path().string() + "\\resources\\textures\\earth_spec.jpg").c_str());
 
-
 	// load character mesh
-	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\crash\\crash.obj", true, true);
-
-	// load soulspear mesh
-	m_spearMesh.load(fs::current_path().string() + "\\resources\\objects\\soulspear\\soulspear.obj", true, true);
+	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
 
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
 
-	// load skybox textures
+	// load skybox textures into a cubemap
 	std::vector<std::string> skyboxTextures;
 	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\right.tga");
 	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\left.tga");
@@ -111,6 +112,7 @@ void OpenGLApplication::setup()
 
 	m_directionalLight.direction = glm::normalize(glm::vec3(1, -1, -1));
 
+	// set camera position
 	m_camera.setPosition(glm::vec3(-10, 10, 10));
 }
 
@@ -142,9 +144,10 @@ void OpenGLApplication::render()
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// enable shader
+	// bind phong shader
 	m_phongShader.bind();
 
+	// store time as a float
 	float time = (float)glfwGetTime();
 
 	// update directional light
@@ -154,7 +157,7 @@ void OpenGLApplication::render()
 	m_phongShader.setVec3("directionalLight.specular", m_directionalLight.specular);
 
 	// update point light
-	m_pointLight.position = glm::vec3(0, 60.0f + std::sin(time) * 20.0f, 25.0f);
+	m_pointLight.position = glm::vec3(std::sin(time) * 200.0f, 45.0f, std::cos(time) * 200.0f);
 	m_phongShader.setVec3("pointLight.position", m_pointLight.position);
 	m_phongShader.setVec3("pointLight.ambient", m_pointLight.ambient);
 	m_phongShader.setVec3("pointLight.diffuse", m_pointLight.diffuse);
@@ -167,83 +170,58 @@ void OpenGLApplication::render()
 	m_phongShader.setInt("skybox", 18);
 	m_cubemap.bind(18);
 
-	// get model matrix
+	// create model matrix
 	glm::mat4 model(1);
 	model = glm::rotate(model, glm::radians(time) * 30.0f, glm::vec3(0, 1, 0));
 	m_phongShader.setMat4("ModelMatrix", model);
 
-	// combine matrices
+	// create projection view model matrix
 	glm::mat4 pvm = m_camera.getProjectionViewMatrix() * model;
 	m_phongShader.setMat4("ProjectionViewModel", pvm);
 
-	// send normal matrix
+	// create normal matrix
 	glm::mat3 normalMatrix = glm::inverseTranspose(model);
 	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-
-	m_phongShader.setFloat("time", time);
 
 	// draw procedural mesh
 	m_proceduralMesh.draw(m_phongShader);
 
+	// recreate model matrix for character mesh
 	model = glm::mat4(1);
-	model = glm::translate(model, glm::vec3(0, 30, 0));
-
+	model = glm::translate(model, glm::vec3(0, 32, 0));
+	model = glm::scale(model, glm::vec3(2.0f));
 	m_phongShader.setMat4("ModelMatrix", model);
 
-	// combine matrices
+	// recreate projection view model matrix
 	pvm = m_camera.getProjectionViewMatrix() * model;
 	m_phongShader.setMat4("ProjectionViewModel", pvm);
 
-	// send normal matrix
+	// recreate normal matrix
 	normalMatrix = glm::inverseTranspose(model);
 	m_phongShader.setMat3("NormalMatrix", normalMatrix);
 
 	// draw character mesh
 	m_characterMesh.draw(m_phongShader);
 
-	// draw soulspear mesh
-	model = glm::mat4(1);
-	model = glm::translate(model, glm::vec3(17.6f, 52.3f, 3.1f));
-	model = glm::rotate(model, glm::radians(253.2f), glm::vec3(1, 0, 0));
-	model = glm::scale(model, glm::vec3(10.0f));
+	// draw skybox
 
-	m_phongShader.setMat4("ModelMatrix", model);
-
-	// combine matrices
-	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
-
-	// send normal matrix
-	normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-
-	m_spearMesh.draw(m_phongShader);
-
-	// draw soulspear mesh
-	model = glm::mat4(1);
-	model = glm::translate(model, glm::vec3(-17.6f, 52.3f, 3.1f));
-	model = glm::rotate(model, glm::radians(253.2f), glm::vec3(1, 0, 0));
-	model = glm::scale(model, glm::vec3(10.0f));
-
-	m_phongShader.setMat4("ModelMatrix", model);
-
-	// combine matrices
-	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
-
-	// send normal matrix
-	normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-
-	m_spearMesh.draw(m_phongShader);
-
-	// draw skybox last
+	// use less than or equal for the depth function to allow the skybox to draw when the z buffer is empty
 	glDepthFunc(GL_LEQUAL);
+
+	// bind skybox shader
 	m_skyboxShader.bind();
+
+	// remove the translation component of the view matrix for the skybox
 	m_skyboxShader.setMat4("view", glm::mat4(glm::mat3(m_camera.GetViewMatrix())));
 	m_skyboxShader.setMat4("projection", m_camera.getProjectionMatrix());
+
+	// bind the cubemap to slot 0
 	m_cubemap.bind(0);
+	m_skyboxShader.setInt("skybox", 0);
+
+	// draw skybox
 	m_skybox.draw(m_skyboxShader);
+
 	glDepthFunc(GL_LESS);
 
 	// swap buffers and poll window events

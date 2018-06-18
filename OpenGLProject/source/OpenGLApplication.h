@@ -51,12 +51,11 @@ private:
 	PointLight m_pointLight;
 
 	// skybox
-	Mesh m_skybox; // skybox cube
+	Mesh m_skybox; // skybox mesh
 	Shader m_skyboxShader; // skybox shader
 	Cubemap m_cubemap; // skybox cubemap texture
 
 	// Mesh(es)
-	Mesh m_proceduralMesh; // procedural mesh
+	Mesh m_proceduralMesh; // procedurally generated mesh
 	OBJMesh m_characterMesh; // character mesh
-	OBJMesh m_spearMesh; // soulspear mesh
 };
