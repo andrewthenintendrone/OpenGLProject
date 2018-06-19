@@ -91,7 +91,7 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().normalTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_normal.png").c_str());
 
 	// load character mesh
-	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
+	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\Waluigi\\Waluigi.obj", true, true);
 
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
