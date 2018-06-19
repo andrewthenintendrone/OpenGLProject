@@ -77,7 +77,7 @@ void OpenGLApplication::setup()
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
-	m_proceduralMesh.initialiseSphere(32.0f, 32, 64);
+	m_proceduralMesh.initialiseSphere(32.0f, 128, 256);
 	m_proceduralMesh.material().ambient = Color::White().asVec3();
 	m_proceduralMesh.material().diffuse = Color::White().asVec3();
 	m_proceduralMesh.material().specular = Color::White().asVec3();
