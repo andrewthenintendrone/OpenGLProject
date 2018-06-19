@@ -358,11 +358,11 @@ void Mesh::draw(Shader shader)
 	// using indices or just vertices
 	if (ibo != 0)
 	{
-		glDrawElements(GL_TRIANGLES, m_indices.size(),
+		glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(),
 			GL_UNSIGNED_INT, 0);
 	}
 	else
 	{
-		glDrawArrays(GL_PATCHES, 0, m_verts.size());
+		glDrawArrays(GL_PATCHES, 0, (GLsizei)m_verts.size());
 	}
 }
