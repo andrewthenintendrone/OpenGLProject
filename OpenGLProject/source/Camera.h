@@ -30,8 +30,8 @@ protected:
 	void updateProjectionViewMatrix();
 
 	// Camera Attributes
-	glm::vec3 m_position = glm::vec4(0, 0, 0, 1); // position in world space
-	glm::vec3 m_targetPosition = glm::vec3(0); // position to look at in world space
+	glm::vec3 m_position = glm::vec3(0, 0, 1); // position in world space
+	glm::vec3 m_lookAt = glm::vec3(0); // position to look at in world space
 
 	// current view and projection matrices
 	glm::mat4 m_viewMatrix = glm::mat4(1);

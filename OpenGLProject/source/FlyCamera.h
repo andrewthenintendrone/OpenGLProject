@@ -18,8 +18,6 @@ public:
 
 	FlyCamera();
 
-	void setPosition(const glm::vec3 position);
-
 	void processKeyboard(Camera_Movement direction);
 	void processMouseMovement(float xoffset, float yoffset);
 
@@ -33,8 +31,8 @@ private:
 
 	float m_mouseSensitivity = 0.1f;
 
-	float m_pitch = -45.0f;
-	float m_yaw = -45.0f;
+	float m_pitch = 0.0f;
+	float m_yaw = -90.0f;
 
 	float m_walkSpeed = 10.0f;
 	float m_runSpeed = 50.0f;

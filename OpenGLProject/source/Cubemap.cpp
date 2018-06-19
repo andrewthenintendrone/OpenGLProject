@@ -37,8 +37,6 @@ void Cubemap::load(std::vector<std::string> filenames)
 		// if data was read succesfully
 		if (data)
 		{
-			std::cout << "Loaded texture from " << filenames[i] << std::endl;
-
 			// determine texture format
 			switch (comp)
 			{

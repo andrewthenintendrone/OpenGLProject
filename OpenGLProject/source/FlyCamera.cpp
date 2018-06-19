@@ -11,14 +11,6 @@ FlyCamera::FlyCamera()
 	updateProjectionViewMatrix();
 }
 
-void FlyCamera::setPosition(const glm::vec3 position)
-{
-	m_position = position;
-
-	updateViewMatrix();
-	updateProjectionViewMatrix();
-}
-
 void FlyCamera::processKeyboard(Camera_Movement direction)
 {
 	float velocity = (m_running ? m_runSpeed : m_walkSpeed) * Time::getInstance().deltaTime();
@@ -63,7 +55,7 @@ void FlyCamera::processMouseMovement(float xoffset, float yoffset)
 void FlyCamera::updateViewMatrix()
 {
 	// Calculate front vector
-	glm::vec3 front;
+	glm::vec3 front = glm::vec3(0);
 	front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
 	front.y = sin(glm::radians(m_pitch));
 	front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));

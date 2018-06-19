@@ -85,9 +85,9 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().reflectionCoefficient = 0.5f;
 
 	// apply textures to the procedural mesh
-	m_proceduralMesh.material().diffuseTexture.load((fs::current_path().string() + "\\resources\\textures\\earth.jpg").c_str());
-	m_proceduralMesh.material().ambientTexture.load((fs::current_path().string() + "\\resources\\textures\\earth_night.jpg").c_str());
-	m_proceduralMesh.material().specularTexture.load((fs::current_path().string() + "\\resources\\textures\\earth_spec.jpg").c_str());
+	m_proceduralMesh.material().diffuseTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth.jpg").c_str());
+	m_proceduralMesh.material().ambientTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_night.jpg").c_str());
+	m_proceduralMesh.material().specularTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_spec.jpg").c_str());
 
 	// load character mesh
 	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\Mario\\Mario.obj", true, true);
@@ -113,7 +113,7 @@ void OpenGLApplication::setup()
 	m_directionalLight.direction = glm::normalize(glm::vec3(1, -1, -1));
 
 	// set camera position
-	m_camera.setPosition(glm::vec3(-10, 10, 10));
+	m_camera.setPosition(glm::vec3(0, 0, 150));
 }
 
 void OpenGLApplication::run()
