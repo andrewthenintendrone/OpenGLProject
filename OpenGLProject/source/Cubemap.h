@@ -7,6 +7,7 @@ class Cubemap
 {
 public:
 
+	void load(std::string filename);
 	void load(std::vector<std::string> filenames);
 
 	void bind(unsigned int slot) const;

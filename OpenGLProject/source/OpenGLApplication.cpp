@@ -74,6 +74,7 @@ void OpenGLApplication::setup()
 {
 	// load and compile shaders
 	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
+	m_mirrorShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\mirror.fs").c_str());
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
@@ -98,12 +99,12 @@ void OpenGLApplication::setup()
 
 	// load skybox textures into a cubemap
 	std::vector<std::string> skyboxTextures;
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\right.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\left.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\up.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\down.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\front.tga");
-	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\ame_nebula\\back.tga");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\right.png");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\left.png");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\up.png");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\down.png");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\front.png");
+	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\back.png");
 	m_cubemap.load(skyboxTextures);
 
 	// set up lights
@@ -187,22 +188,28 @@ void OpenGLApplication::render()
 	// draw procedural mesh
 	m_proceduralMesh.draw(m_phongShader);
 
+	// bind mirror shader
+	m_mirrorShader.bind();
+
 	// recreate model matrix for character mesh
 	model = glm::mat4(1);
 	model = glm::translate(model, glm::vec3(0, 32, 0));
 	model = glm::scale(model, glm::vec3(2.0f));
-	m_phongShader.setMat4("ModelMatrix", model);
+	m_mirrorShader.setMat4("ModelMatrix", model);
 
 	// recreate projection view model matrix
 	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
+	m_mirrorShader.setMat4("ProjectionViewModel", pvm);
 
 	// recreate normal matrix
 	normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
+	m_mirrorShader.setMat3("NormalMatrix", normalMatrix);
+
+	m_mirrorShader.setVec3("cameraPosition", m_camera.getPosition());
+	m_mirrorShader.setInt("skybox", 18);
 
 	// draw character mesh
-	m_characterMesh.draw(m_phongShader);
+	m_characterMesh.draw(m_mirrorShader);
 
 	// draw skybox
 
