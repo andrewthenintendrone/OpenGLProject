@@ -187,24 +187,6 @@ public:
 	static Color Yellow();
 	static Color YellowGreen();
 
-	// splatoon 2
-	static Color Splatoon2Lemon();
-	static Color Splatoon2Plum();
-	static Color Splatoon2Sky();
-	static Color Splatoon2Gold();
-	static Color Splatoon2LightPink();
-	static Color Splatoon2Blue();
-	static Color Splatoon2NeonPink();
-	static Color Splatoon2NeonGreen();
-	static Color Splatoon2Pink();
-	static Color Splatoon2LightBlue();
-	static Color Splatoon2Raspberry();
-	static Color Splatoon2NeonYellow();
-	static Color Splatoon2DarkPurple();
-	static Color Splatoon2Orange();
-	static Color Splatoon2Grape();
-	static Color Splatoon2Turquoise();
-
 #pragma endregion
 
 };

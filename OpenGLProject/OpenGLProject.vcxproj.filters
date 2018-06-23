@@ -110,9 +110,6 @@
     <ClInclude Include="source\Array2D.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Color.h">
-      <Filter>Source Files\structs</Filter>
-    </ClInclude>
     <ClInclude Include="source\Light.h">
       <Filter>Source Files\structs</Filter>
     </ClInclude>
@@ -124,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="source\MeshChunk.h">
       <Filter>Source Files\structs</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Color.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
