@@ -45,7 +45,6 @@ private:
 
 	// Shader(s)
 	Shader m_phongShader;
-	Shader m_mirrorShader;
 
 	// Light(s)
 	DirectionalLight m_directionalLight;

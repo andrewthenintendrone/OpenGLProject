@@ -9,6 +9,18 @@ in mat3 TBN;
 in vec2 vTexCoords;
 in vec4 vColor;
 
+// point light
+struct PointLight
+{
+	vec3 position;
+	
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+uniform PointLight pointLight;
+
+// directional light
 struct DirectionalLight
 {
 	vec3 direction;
@@ -21,19 +33,24 @@ uniform DirectionalLight directionalLight;
 
 struct Material
 {
+	// colors
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
 	vec3 emissive;
 
+	// properties
 	float roughness;
 	float reflectionCoefficient;
 
-	sampler2D ambientTexture;
+	// textures
 	sampler2D diffuseTexture;
-	sampler2D specularTexture;
-	sampler2D normalTexture;
 	sampler2D alphaTexture;
+	sampler2D ambientTexture;
+	sampler2D specularTexture;
+	sampler2D specularHighlightTexture;
+	sampler2D normalTexture;
+	sampler2D displacementTexture;
 };
 uniform Material material;
 
@@ -45,12 +62,18 @@ out vec4 FragColor;
 
 void main()
 {
+	// transparency
+	if(texture(material.diffuseTexture, vTexCoords).a < 0.5)
+	{
+		discard;
+	}
+
 	// sample textures
 	vec3 ambientTexture = texture(material.ambientTexture, vTexCoords).rgb;
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
+	vec3 specularHighlightTexture = texture(material.specularHighlightTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
-	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb;
 
 	// tangent space normals
 	vec3 N = TBN * (normalTexture * 2 - 1);

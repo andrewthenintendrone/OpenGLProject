@@ -202,15 +202,6 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 // draw mesh
 void OBJMesh::draw(Shader shader, bool usePatches)
 {
-	// set texture slots (these don't change per material)
-	shader.setInt("material.diffuseTexture", 0);
-	shader.setInt("material.alphaTexture", 1);
-	shader.setInt("material.ambientTexture", 2);
-	shader.setInt("material.specularTexture", 3);
-	shader.setInt("material.specularHighlightTexture", 4);
-	shader.setInt("material.normalTexture", 5);
-	shader.setInt("material.alphaTexture", 6);
-
 	int currentMaterial = -1;
 
 	// draw the mesh chunks
@@ -219,26 +210,7 @@ void OBJMesh::draw(Shader shader, bool usePatches)
 		// bind material
 		if (currentMaterial != c.materialID)
 		{
-			currentMaterial = c.materialID;
-
-			shader.setVec3("material.ambient", m_materials[currentMaterial].ambient);
-			shader.setVec3("material.diffuse", m_materials[currentMaterial].diffuse);
-			shader.setVec3("material.specular", m_materials[currentMaterial].specular);
-			shader.setVec3("material.emissive", m_materials[currentMaterial].emissive);
-
-			shader.setFloat("material.opacity", m_materials[currentMaterial].opacity);
-			shader.setFloat("material.specularPower", m_materials[currentMaterial].specularPower);
-
-			shader.setFloat("material.roughness", m_materials[currentMaterial].roughness);
-			shader.setFloat("material.reflectionCoefficiant", m_materials[currentMaterial].reflectionCoefficient);
-
-			m_materials[currentMaterial].diffuseTexture.bind(0);
-			m_materials[currentMaterial].alphaTexture.bind(1);
-			m_materials[currentMaterial].ambientTexture.bind(2);
-			m_materials[currentMaterial].specularTexture.bind(3);
-			m_materials[currentMaterial].specularHighlightTexture.bind(4);
-			m_materials[currentMaterial].normalTexture.bind(5);
-			m_materials[currentMaterial].alphaTexture.bind(6);
+			m_materials[c.materialID].bind(shader);
 		}
 
 		// bind and draw geometry

@@ -325,33 +325,7 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 
 void Mesh::draw(Shader shader)
 {
-	// set uniforms
-	shader.setVec3("material.ambient", m_material.ambient);
-	shader.setVec3("material.diffuse", m_material.diffuse);
-	shader.setVec3("material.specular", m_material.specular);
-	shader.setVec3("material.emissive", m_material.emissive);
-	
-	shader.setFloat("material.specularPower", m_material.specularPower);
-	shader.setFloat("material.opacity", m_material.opacity);
-	shader.setFloat("material.roughness", m_material.roughness);
-	shader.setFloat("material.reflectionCoefficient", m_material.reflectionCoefficient);
-
-	// set textures
-	shader.setInt("material.diffuseTexture", 0);
-	shader.setInt("material.alphaTexture", 1);
-	shader.setInt("material.ambientTexture", 2);
-	shader.setInt("material.specularTexture", 3);
-	shader.setInt("material.specularHighlightTexture", 4);
-	shader.setInt("material.normalTexture", 5);
-	shader.setInt("material.displacementTexture", 6);
-
-	m_material.diffuseTexture.bind(0);
-	m_material.alphaTexture.bind(1);
-	m_material.ambientTexture.bind(2);
-	m_material.specularTexture.bind(3);
-	m_material.specularHighlightTexture.bind(4);
-	m_material.normalTexture.bind(5);
-	m_material.alphaTexture.bind(6);
+	m_material.bind(shader);
 
 	glBindVertexArray(vao);
 

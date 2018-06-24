@@ -74,7 +74,6 @@ void OpenGLApplication::setup()
 {
 	// load and compile shaders
 	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
-	m_mirrorShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\mirror.fs").c_str());
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
@@ -92,7 +91,7 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().normalTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_normal.png").c_str());
 
 	// load character mesh
-	m_characterMesh.load(fs::current_path().string() + "\\resources\\objects\\Waluigi\\Waluigi.obj", true, true);
+	m_characterMesh.load("C:\\Users\\Andrew\\Documents\\3d modeling\\splatoon\\Marina\\Marina.obj", true, true);
 
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
@@ -115,7 +114,8 @@ void OpenGLApplication::setup()
 	m_directionalLight.direction = glm::normalize(glm::vec3(1, -1, -1));
 
 	// set camera position
-	m_camera.setPosition(glm::vec3(0, 0, 150));
+	m_camera.setPosition(glm::vec3(0, 15, 25));
+	m_camera.setLookAt(glm::vec3(0, 15, 0));
 }
 
 void OpenGLApplication::run()
@@ -153,17 +153,11 @@ void OpenGLApplication::render()
 	float time = (float)glfwGetTime();
 
 	// update directional light
-	m_phongShader.setVec3("directionalLight.direction", m_directionalLight.direction);
-	m_phongShader.setVec3("directionalLight.ambient", m_directionalLight.ambient);
-	m_phongShader.setVec3("directionalLight.diffuse", m_directionalLight.diffuse);
-	m_phongShader.setVec3("directionalLight.specular", m_directionalLight.specular);
+	m_directionalLight.bind(m_phongShader);
 
 	// update point light
 	m_pointLight.position = glm::vec3(std::sin(time) * 200.0f, 45.0f, std::cos(time) * 200.0f);
-	m_phongShader.setVec3("pointLight.position", m_pointLight.position);
-	m_phongShader.setVec3("pointLight.ambient", m_pointLight.ambient);
-	m_phongShader.setVec3("pointLight.diffuse", m_pointLight.diffuse);
-	m_phongShader.setVec3("pointLight.specular", m_pointLight.specular);
+	m_pointLight.bind(m_phongShader);
 
 	// send camera position
 	m_phongShader.setVec3("cameraPosition", m_camera.getPosition());
@@ -188,28 +182,25 @@ void OpenGLApplication::render()
 	// draw procedural mesh
 	m_proceduralMesh.draw(m_phongShader);
 
-	// bind mirror shader
-	m_mirrorShader.bind();
-
 	// recreate model matrix for character mesh
 	model = glm::mat4(1);
 	model = glm::translate(model, glm::vec3(0, 32, 0));
 	model = glm::scale(model, glm::vec3(2.0f));
-	m_mirrorShader.setMat4("ModelMatrix", model);
+	m_phongShader.setMat4("ModelMatrix", model);
 
 	// recreate projection view model matrix
 	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_mirrorShader.setMat4("ProjectionViewModel", pvm);
+	m_phongShader.setMat4("ProjectionViewModel", pvm);
 
 	// recreate normal matrix
 	normalMatrix = glm::inverseTranspose(model);
-	m_mirrorShader.setMat3("NormalMatrix", normalMatrix);
+	m_phongShader.setMat3("NormalMatrix", normalMatrix);
 
-	m_mirrorShader.setVec3("cameraPosition", m_camera.getPosition());
-	m_mirrorShader.setInt("skybox", 18);
+	m_phongShader.setVec3("cameraPosition", m_camera.getPosition());
+	m_phongShader.setInt("skybox", 18);
 
 	// draw character mesh
-	m_characterMesh.draw(m_mirrorShader);
+	m_characterMesh.draw(m_phongShader);
 
 	// draw skybox
 

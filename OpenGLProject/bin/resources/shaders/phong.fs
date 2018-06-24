@@ -58,17 +58,19 @@ out vec4 FragColor;
 void main()
 {
 	// transparency
-	if(texture(material.diffuseTexture, vTexCoords).a < 0.1)
+	if(texture(material.diffuseTexture, vTexCoords).a < 0.5)
 	{
 		discard;
 	}
 
 	// sample textures
-	vec3 ambientTexture = texture(material.ambientTexture, vTexCoords).rgb;
 	vec3 diffuseTexture = texture(material.diffuseTexture, vTexCoords).rgb;
+	vec3 alphaTexture = texture(material.alphaTexture, vTexCoords).rgb;
+	vec3 ambientTexture = texture(material.ambientTexture, vTexCoords).rgb;
 	vec3 specularTexture = texture(material.specularTexture, vTexCoords).rgb;
 	vec3 specularHighlightTexture = texture(material.specularHighlightTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
+	vec3 displacementTexture = texture(material.displacementTexture, vTexCoords).rgb;
 
 	// ambient lightning
 	vec3 ambient = directionalLight.ambient * pointLight.ambient * material.ambient * ambientTexture;
@@ -99,4 +101,5 @@ void main()
 	specular /= 2.0;
 
 	FragColor = vec4(ambient + diffuse + specular, 1.0);
+	FragColor += vec4(displacementTexture * vec3(0.011765, 0.701961, 0.384314), 0.0);
 }
