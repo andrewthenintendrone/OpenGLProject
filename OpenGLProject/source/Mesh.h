@@ -18,6 +18,7 @@ public:
 	void initialiseCircle(float radius, int segments);
 	void initialiseCylinder(float radius, float height, int segments);
 	void initialiseSphere(float radius, int rows, int columns);
+	void initialiseIcosahedron();
 
 	virtual void draw(Shader shader);
 

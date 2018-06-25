@@ -49,7 +49,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tes
 		}
 		if (tessEPath)
 		{
-			tessCFile.open(tessEPath);
+			tessEFile.open(tessEPath);
 			tessEShaderStream << tessEFile.rdbuf();
 			tessEFile.close();
 			tessECode = tessEShaderStream.str();

@@ -77,7 +77,7 @@ void OpenGLApplication::setup()
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
-	m_proceduralMesh.initialiseBox();
+	m_proceduralMesh.initialiseIcosahedron();
 	m_proceduralMesh.material().ambient = Color::White().asVec3();
 	m_proceduralMesh.material().diffuse = Color::White().asVec3();
 	m_proceduralMesh.material().specular = Color::White().asVec3();
@@ -185,6 +185,8 @@ void OpenGLApplication::render()
 	m_phongShader.setMat3("NormalMatrix", normalMatrix);
 
 	// draw procedural mesh
+	m_phongShader.setFloat("TessLevelInner", 1);
+	m_phongShader.setFloat("TessLevelOuter", 1);
 	m_proceduralMesh.draw(m_phongShader);
 
 	// terrain
