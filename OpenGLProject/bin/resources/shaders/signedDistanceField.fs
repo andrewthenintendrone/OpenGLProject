@@ -13,9 +13,9 @@ uniform Material material;
 void main()
 {
 	// sample texture
-	float dist = texture(material.diffuseTexture, vTexCoords).r;
+	float dist = texture(material.diffuseTexture, vTexCoords).a;
 
-	if(pow(dist, 0.5) < 0.5)
+	if(dist < 0.5)
 	{
 		discard;
 	}

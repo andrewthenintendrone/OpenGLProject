@@ -77,7 +77,7 @@ void OpenGLApplication::setup()
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
-	m_proceduralMesh.initialiseSphere(32.0f, 128, 256);
+	m_proceduralMesh.initialiseBox();
 	m_proceduralMesh.material().ambient = Color::White().asVec3();
 	m_proceduralMesh.material().diffuse = Color::White().asVec3();
 	m_proceduralMesh.material().specular = Color::White().asVec3();
@@ -91,7 +91,7 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().normalTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_normal.png").c_str());
 
 	// load character mesh
-	m_characterMesh.load("C:\\Users\\Andrew\\Documents\\3d modeling\\splatoon\\Marina\\Marina.obj", true, true);
+	m_characterMesh.load((fs::current_path().string() + "\\resources\\objects\\Waluigi\\Waluigi.obj").c_str());
 
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
@@ -116,6 +116,11 @@ void OpenGLApplication::setup()
 	// set camera position
 	m_camera.setPosition(glm::vec3(0, 15, 25));
 	m_camera.setLookAt(glm::vec3(0, 15, 0));
+
+	m_terrain = Terrain(128, 128);
+	m_terrain.generatePerlin();
+	m_terrain.material().ambientTexture.load("C:\\Users\\s170837\\Pictures\\terrain\\color\\0_Plant_GreenGrassField_A.png");
+	m_terrain.material().diffuseTexture.load("C:\\Users\\s170837\\Pictures\\terrain\\color\\0_Plant_GreenGrassField_A.png");
 }
 
 void OpenGLApplication::run()
@@ -168,7 +173,7 @@ void OpenGLApplication::render()
 
 	// create model matrix
 	glm::mat4 model(1);
-	model = glm::rotate(model, glm::radians(time) * 30.0f, glm::vec3(0, 1, 0));
+	model = glm::scale(model, glm::vec3(25.0f));
 	m_phongShader.setMat4("ModelMatrix", model);
 
 	// create projection view model matrix
@@ -181,6 +186,20 @@ void OpenGLApplication::render()
 
 	// draw procedural mesh
 	m_proceduralMesh.draw(m_phongShader);
+
+	// terrain
+	model = glm::mat4(1);
+	model = glm::scale(model, glm::vec3(1.0f, 64.0f, 1.0f));
+	m_phongShader.setMat4("ModelMatrix", model);
+
+	// create projection view model matrix
+	pvm = m_camera.getProjectionViewMatrix() * model;
+	m_phongShader.setMat4("ProjectionViewModel", pvm);
+
+	// create normal matrix
+	normalMatrix = glm::inverseTranspose(model);
+	m_phongShader.setMat3("NormalMatrix", normalMatrix);
+	m_terrain.draw(m_phongShader);
 
 	// recreate model matrix for character mesh
 	model = glm::mat4(1);
@@ -206,6 +225,7 @@ void OpenGLApplication::render()
 
 	// use less than or equal for the depth function to allow the skybox to draw when the z buffer is empty
 	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_CULL_FACE);
 
 	// bind skybox shader
 	m_skyboxShader.bind();
@@ -222,6 +242,7 @@ void OpenGLApplication::render()
 	m_skybox.draw(m_skyboxShader);
 
 	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
 
 	// swap buffers and poll window events
 	glfwSwapBuffers(m_window);

@@ -15,7 +15,7 @@ public:
 	OBJMesh() {};
 	~OBJMesh();
 
-	bool load(const std::string& filename, bool loadTextures = true, bool flipTextureV = false);
+	bool load(const std::string& filename);
 
 	void draw(Shader shader, bool usePatches = false);
 

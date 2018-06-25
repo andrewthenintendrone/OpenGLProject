@@ -16,7 +16,7 @@ public:
 	Shader() {};
 
 	
-	Shader(const char* vertexPath, const char* fragmentPath);
+	Shader(const char* vertexPath, const char* fragmentPath = nullptr, const char* tessCPath = nullptr, const char* tessEPath = nullptr);
 
 	void bind();
 

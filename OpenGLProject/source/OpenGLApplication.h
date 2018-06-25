@@ -11,6 +11,7 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+#include "Terrain.h"
 #include "Cubemap.h"
 #include "RenderTarget.h"
 #include "Color.h"
@@ -58,4 +59,5 @@ private:
 	// Mesh(es)
 	Mesh m_proceduralMesh; // procedurally generated mesh
 	OBJMesh m_characterMesh; // character mesh
+	Terrain m_terrain;
 };

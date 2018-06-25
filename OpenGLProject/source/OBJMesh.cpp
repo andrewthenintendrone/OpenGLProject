@@ -16,7 +16,7 @@ OBJMesh::~OBJMesh()
 }
 
 // load an obj file
-bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipTextureV)
+bool OBJMesh::load(const std::string& filename)
 {
 	// don't load if already initialised
 	if (m_meshChunks.empty() == false)
@@ -145,10 +145,9 @@ bool OBJMesh::load(const std::string& filename, bool loadTextures, bool flipText
 				vertices[i].normal = glm::vec4(s.mesh.normals[i * 3 + 0], s.mesh.normals[i * 3 + 1], s.mesh.normals[i * 3 + 2], 0);
 			}
 
-			// flip the T / V (might not always be needed, depends on how mesh was made)
 			if (hasTexture)
 			{
-				vertices[i].texcoord = glm::vec2(s.mesh.texcoords[i * 2 + 0], flipTextureV ? 1.0f - s.mesh.texcoords[i * 2 + 1] : s.mesh.texcoords[i * 2 + 1]);
+				vertices[i].texcoord = glm::vec2(s.mesh.texcoords[i * 2 + 0], s.mesh.texcoords[i * 2 + 1]);
 			}
 		}
 

@@ -24,9 +24,9 @@ void Terrain::generatePerlin()
 	{
 		for (unsigned int y = 0; y < m_gridSizeY; y++)
 		{
-			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 20, 0.5f);
+			float perlin = PerlinNoise::getInstance().octavePerlin(x * 0.01f, y * 0.01f, 6, 0.75f);
 
-			m_heights(x, y) = perlin;
+			m_heights(x, y) += perlin;
 		}
 	}
 
@@ -138,10 +138,16 @@ void Terrain::init()
 			if (x > 0 && x < m_gridSizeX - 1 && y > 0 && y < m_gridSizeY - 1)
 			{
 				// average triangle directions for normal
-				glm::vec3 d1 = getTriangleDirection(verts[i + 1].position, verts[i].position, verts[i - m_gridSizeX].position);
-				glm::vec3 d2 = getTriangleDirection(verts[i - 1].position, verts[i].position, verts[i + m_gridSizeX].position);
+				glm::vec3 d1 = getTriangleDirection(verts[i - m_gridSizeX - 1].position, verts[i - m_gridSizeX].position, verts[i].position);
+				glm::vec3 d2 = getTriangleDirection(verts[i - m_gridSizeX].position, verts[i + 1].position, verts[i].position);
+				glm::vec3 d3 = getTriangleDirection(verts[i].position, verts[i + 1].position, verts[i + m_gridSizeX + 1].position);
+				glm::vec3 d4 = getTriangleDirection(verts[i + m_gridSizeX + 1].position, verts[i + m_gridSizeX].position, verts[i].position);
+				glm::vec3 d5 = getTriangleDirection(verts[i - 1].position, verts[i].position, verts[i + m_gridSizeX].position);
+				glm::vec3 d6 = getTriangleDirection(verts[i].position, verts[i - m_gridSizeX - 1].position, verts[i - m_gridSizeX].position);
 
-				verts[i].normal = glm::vec4(glm::normalize((d1 + d2) * 0.5f), 0);
+				glm::vec3 average = (d1 + d2 + d3 + d4 + d5 + d6) / 6.0f;
+
+				verts[i].normal = glm::vec4(glm::normalize(average), 0);
 				verts[i].tangent = glm::vec4(glm::cross(glm::vec3(verts[i].normal), glm::vec3(0, 1, 0)), 0);
 			}
 		}

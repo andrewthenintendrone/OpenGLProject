@@ -77,6 +77,8 @@ void Cubemap::load(std::vector<std::string> filenames)
 	// don't try to load if this cubemap is already initialised
 	assert(m_glHandle == 0);
 
+	stbi_set_flip_vertically_on_load(false);
+
 	if (filenames.size() != 6)
 	{
 		std::cout << "Cubemap must use 6 textures\n";

@@ -24,6 +24,8 @@ Texture::~Texture()
 
 bool Texture::load(const char* filename)
 {
+	stbi_set_flip_vertically_on_load(true);
+
 	// discard old texture if there is one
 	if (m_glHandle != 0)
 	{

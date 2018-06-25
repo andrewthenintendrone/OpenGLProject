@@ -114,40 +114,43 @@ void Mesh::initialiseQuad()
 
 void Mesh::initialiseBox()
 {
-	std::vector<Vertex> verts(8);
+	std::vector<Vertex> verts;
 
 	// positions
-	verts[0].position = glm::vec4(-0.5f, 0.5f, 0.5f, 1);
-	verts[1].position = glm::vec4(-0.5f, 0.5f, -0.5f, 1);
-	verts[2].position = glm::vec4(0.5f, 0.5f, -0.5f, 1);
-	verts[3].position = glm::vec4(0.5f, 0.5f, 0.5f, 1);
-	verts[4].position = glm::vec4(-0.5f, -0.5f, 0.5f, 1);
-	verts[5].position = glm::vec4(-0.5f, -0.5f, -0.5f, 1);
-	verts[6].position = glm::vec4(0.5f, -0.5f, -0.5f, 1);
-	verts[7].position = glm::vec4(0.5f, -0.5f, 0.5f, 1);
-
-	// normals
-	for (int i = 0; i < 8; i++)
+	for (float x = -0.5f; x < 1.0f; x++)
 	{
-		verts[i].texcoord = glm::vec2(0, 0);
-		verts[i].normal = verts[i].position;
-		verts[i].normal.w = 0;
+		for (float y = -0.5f; y < 1.0f; y++)
+		{
+			for (float z = -0.5f; z < 1.0f; z++)
+			{
+				Vertex v;
+				v.position = glm::vec4(x, y, z, 1.0f);
+				v.normal = glm::vec4(glm::normalize(glm::vec3(v.position)), 0.0f);
+				
+				float tx = x == -0.5 ? 0 : 1;
+				float ty = z == 0.5 ? 0 : 1;
+
+				v.texcoord = glm::vec2(tx, ty);
+
+				verts.push_back(v);
+			}
+		}
 	}
 
 	std::vector<unsigned int> indices =
 	{
-		0, 1, 2,
-		2, 3, 0,
-		4, 0, 3,
-		3, 7, 4,
-		7, 3, 2,
-		2, 6, 7,
-		6, 2, 1,
-		1, 5, 6,
-		5, 1, 0,
-		0, 4, 5,
-		5, 4, 7,
-		7, 6, 5
+		7, 3, 1,
+		1, 5, 7,
+		4, 5, 1,
+		1, 0, 4,
+		6, 7, 5,
+		5, 4, 6,
+		2, 3, 7,
+		7, 6, 2,
+		0, 1, 3,
+		3, 2, 0,
+		6, 4, 0,
+		0, 2, 6
 	};
 
 	initialise(verts, &indices);
@@ -187,7 +190,7 @@ void Mesh::initialiseCircle(float radius, int segments)
 		indices.push_back(i % segments + 1);
 	}
 
-	initialise(verts);
+	initialise(verts, &indices);
 }
 
 void Mesh::initialiseCylinder(float radius, float height, int segments)
@@ -299,7 +302,7 @@ void Mesh::initialiseSphere(float radius, int rows, int columns)
 			Vertex v;
 			v.position = glm::vec4(v4Point, 1);
 			v.normal = glm::vec4(v4Normal, 1);
-			v.texcoord = glm::vec2(yRatio, -xRatio);
+			v.texcoord = glm::vec2(yRatio, xRatio);
 			v.tangent = glm::vec4(glm::cross(glm::vec3(0, 1, 0), glm::vec3(v4Normal)), 0);
 
 			//verts[index] = v;
@@ -337,6 +340,6 @@ void Mesh::draw(Shader shader)
 	}
 	else
 	{
-		glDrawArrays(GL_PATCHES, 0, (GLsizei)m_verts.size());
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_verts.size());
 	}
 }
