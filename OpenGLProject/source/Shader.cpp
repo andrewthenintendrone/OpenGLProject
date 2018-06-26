@@ -2,28 +2,35 @@
 #include <iostream>
 
 // constructor generates the shader on the fly
-Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tessCPath, const char* tessEPath)
+Shader::Shader(const char* vertexPath,
+	const char* fragmentPath,
+	const char* geometryPath,
+	const char* tessCPath,
+	const char* tessEPath)
 {
 	// create ifstreams and strings for reading in shaders from files
 	std::string vertexCode;
 	std::string fragmentCode;
+	std::string geometryCode;
 	std::string tessCCode;
 	std::string tessECode;
 
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
+	std::ifstream gShaderFile;
 	std::ifstream tessCFile;
 	std::ifstream tessEFile;
 
 	// enable exceptions on ifstreams
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	tessCFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	tessEFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 	try
 	{
-		std::stringstream vShaderStream, fShaderStream, tessCShaderStream, tessEShaderStream;
+		std::stringstream vShaderStream, fShaderStream, gShaderStream, tessCShaderStream, tessEShaderStream;
 
 		// open files
 		if (vertexPath)
@@ -39,6 +46,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tes
 			fShaderStream << fShaderFile.rdbuf();
 			fShaderFile.close();
 			fragmentCode = fShaderStream.str();
+		}
+		if (geometryPath)
+		{
+			gShaderFile.open(geometryPath);
+			gShaderStream << gShaderFile.rdbuf();
+			gShaderFile.close();
+			geometryCode = gShaderStream.str();
 		}
 		if (tessCPath)
 		{
@@ -61,9 +75,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tes
 	}
 
 	// compile shaders
-	unsigned int vertex, fragment, tessC, tessE;
+	unsigned int vertex, fragment, geometry, tessC, tessE;
 	ID = glCreateProgram();
-
 
 	if (vertexPath)
 	{
@@ -82,6 +95,15 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tes
 		glCompileShader(fragment);
 		checkCompileErrors(fragment, "FRAGMENT");
 		glAttachShader(ID, fragment);
+	}
+	if (geometryPath)
+	{
+		const char* gShaderCode = geometryCode.c_str();
+		geometry = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometry, 1, &gShaderCode, NULL);
+		glCompileShader(geometry);
+		checkCompileErrors(geometry, "GEOMETRY");
+		glAttachShader(ID, geometry);
 	}
 	if (tessCPath)
 	{
@@ -113,6 +135,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* tes
 	if (fragmentPath)
 	{
 		glDeleteShader(fragment);
+	}
+	if (geometryPath)
+	{
+		glDeleteShader(geometry);
 	}
 	if (tessCPath)
 	{

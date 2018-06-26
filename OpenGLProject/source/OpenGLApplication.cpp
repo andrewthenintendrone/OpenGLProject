@@ -73,8 +73,10 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 void OpenGLApplication::setup()
 {
 	// load and compile shaders
-	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
-	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(), (fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
+	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(),
+		(fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
+	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(),
+		(fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
 	// generate procedural mesh
 	m_proceduralMesh.initialiseIcosahedron();
@@ -90,9 +92,6 @@ void OpenGLApplication::setup()
 	m_proceduralMesh.material().specularTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_spec.png").c_str());
 	m_proceduralMesh.material().normalTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_normal.png").c_str());
 
-	// load character mesh
-	m_characterMesh.load((fs::current_path().string() + "\\resources\\objects\\Waluigi\\Waluigi.obj").c_str());
-
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
 
@@ -106,6 +105,9 @@ void OpenGLApplication::setup()
 	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\back.png");
 	m_cubemap.load(skyboxTextures);
 
+	m_jakMesh.load("C:\\Users\\s170837\\Desktop\\Jak\\Jak.obj");
+	m_daxterMesh.load("C:\\Users\\s170837\\Desktop\\Daxter\\Daxter.obj");
+
 	// set up lights
 	m_pointLight.ambient = Color::White().asVec3();
 	m_pointLight.diffuse = Color::White().asVec3();
@@ -116,11 +118,6 @@ void OpenGLApplication::setup()
 	// set camera position
 	m_camera.setPosition(glm::vec3(0, 15, 25));
 	m_camera.setLookAt(glm::vec3(0, 15, 0));
-
-	m_terrain = Terrain(128, 128);
-	m_terrain.generatePerlin();
-	m_terrain.material().ambientTexture.load("C:\\Users\\s170837\\Pictures\\terrain\\color\\0_Plant_GreenGrassField_A.png");
-	m_terrain.material().diffuseTexture.load("C:\\Users\\s170837\\Pictures\\terrain\\color\\0_Plant_GreenGrassField_A.png");
 }
 
 void OpenGLApplication::run()
@@ -157,71 +154,26 @@ void OpenGLApplication::render()
 	// store time as a float
 	float time = (float)glfwGetTime();
 
-	// update directional light
 	m_directionalLight.bind(m_phongShader);
-
-	// update point light
-	m_pointLight.position = glm::vec3(std::sin(time) * 200.0f, 45.0f, std::cos(time) * 200.0f);
 	m_pointLight.bind(m_phongShader);
 
-	// send camera position
 	m_phongShader.setVec3("cameraPosition", m_camera.getPosition());
 
-	// enable skybox
-	m_phongShader.setInt("skybox", 18);
-	m_cubemap.bind(18);
-
-	// create model matrix
 	glm::mat4 model(1);
-	model = glm::scale(model, glm::vec3(25.0f));
-	m_phongShader.setMat4("ModelMatrix", model);
+	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
+	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
+	m_jakMesh.draw(m_phongShader);
 
-	// create projection view model matrix
-	glm::mat4 pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
+	model = glm::mat4(1);
+	model = glm::rotate(model, glm::radians(std::floorf(time)), glm::vec3(-1, 0, 0));
+	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
+	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
+	m_daxterMesh.draw(m_phongShader);
 
-	// create normal matrix
-	glm::mat3 normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-
-	// draw procedural mesh
-	m_phongShader.setFloat("TessLevelInner", 1);
-	m_phongShader.setFloat("TessLevelOuter", 1);
+	model = glm::mat4(1);
+	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
+	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
 	m_proceduralMesh.draw(m_phongShader);
-
-	// terrain
-	model = glm::mat4(1);
-	model = glm::scale(model, glm::vec3(1.0f, 64.0f, 1.0f));
-	m_phongShader.setMat4("ModelMatrix", model);
-
-	// create projection view model matrix
-	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
-
-	// create normal matrix
-	normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-	m_terrain.draw(m_phongShader);
-
-	// recreate model matrix for character mesh
-	model = glm::mat4(1);
-	model = glm::translate(model, glm::vec3(0, 32, 0));
-	model = glm::scale(model, glm::vec3(2.0f));
-	m_phongShader.setMat4("ModelMatrix", model);
-
-	// recreate projection view model matrix
-	pvm = m_camera.getProjectionViewMatrix() * model;
-	m_phongShader.setMat4("ProjectionViewModel", pvm);
-
-	// recreate normal matrix
-	normalMatrix = glm::inverseTranspose(model);
-	m_phongShader.setMat3("NormalMatrix", normalMatrix);
-
-	m_phongShader.setVec3("cameraPosition", m_camera.getPosition());
-	m_phongShader.setInt("skybox", 18);
-
-	// draw character mesh
-	m_characterMesh.draw(m_phongShader);
 
 	// draw skybox
 

@@ -21,8 +21,6 @@ uniform mat3 NormalMatrix;
 
 void main()
 {
-	gl_PointSize = 10.0;
-
 	vPosition = ModelMatrix * Position;
 	
 	// calculate TBN in vertex shader for efficiency

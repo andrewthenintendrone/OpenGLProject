@@ -58,6 +58,6 @@ private:
 
 	// Mesh(es)
 	Mesh m_proceduralMesh; // procedurally generated mesh
-	OBJMesh m_characterMesh; // character mesh
-	Terrain m_terrain;
+	OBJMesh m_jakMesh;
+	OBJMesh m_daxterMesh;
 };
