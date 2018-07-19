@@ -13,9 +13,12 @@ public:
 
 	// constructor / destructor
 	OBJMesh() {};
+	OBJMesh(const std::string& filename) { load(filename); }
 	~OBJMesh();
 
 	bool load(const std::string& filename);
+
+	void toggleNormalMaps();
 
 	void draw(Shader shader, bool usePatches = false);
 

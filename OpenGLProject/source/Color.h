@@ -36,6 +36,8 @@ public:
 	Color operator - (const Color& other) const;
 	void operator -= (const Color& other);
 
+	const static Color lerp(const Color& color1, const Color& color2, const float factor);
+
 #pragma region constants
 
 	static Color AliceBlue();

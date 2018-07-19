@@ -6,7 +6,10 @@ in mat3 TBN;
 in vec2 vTexCoords;
 in vec4 vColor;
 
-// point light
+uniform bool correctGamma;
+
+// point light(s)
+uniform int pointLightCount;
 struct PointLight
 {
 	vec3 position;
@@ -15,9 +18,10 @@ struct PointLight
 	vec3 diffuse;
 	vec3 specular;
 };
-uniform PointLight pointLight;
+uniform PointLight pointLights[20];
 
-// directional light
+// directional light(s)
+uniform int directionalLightCount;
 struct DirectionalLight
 {
 	vec3 direction;
@@ -26,7 +30,7 @@ struct DirectionalLight
 	vec3 diffuse;
 	vec3 specular;
 };
-uniform DirectionalLight directionalLight;
+uniform DirectionalLight directionalLights[20];
 
 struct Material
 {
@@ -44,16 +48,20 @@ struct Material
 	sampler2D specularHighlightTexture;
 	sampler2D normalTexture;
 	sampler2D displacementTexture;
+	sampler2D emissiveTexture;
 
 	// properties
 	float specularPower;
 	float opacity;
+	bool useNormalMap;
 };
 uniform Material material;
 
 uniform vec3 cameraPosition;
 
 out vec4 FragColor;
+
+vec4 gammaCorrection(vec4 color);
 
 void main()
 {
@@ -71,35 +79,69 @@ void main()
 	vec3 specularHighlightTexture = texture(material.specularHighlightTexture, vTexCoords).rgb;
 	vec3 normalTexture = texture(material.normalTexture, vTexCoords).rgb;
 	vec3 displacementTexture = texture(material.displacementTexture, vTexCoords).rgb;
+	vec3 emissiveTexture = texture(material.emissiveTexture, vTexCoords).rgb;
 
-	// ambient lightning
-	vec3 ambient = directionalLight.ambient * pointLight.ambient * material.ambient * ambientTexture;
+	// ambient lighting
+	vec3 ambient = material.ambient * ambientTexture;
 
 	// use normals
-	vec3 N = TBN * (normalTexture * 2.0 - 1.0);
+	vec3 N;
 
-	// diffuse lighting
-	vec3 L = normalize(directionalLight.direction);
-	float lambertTerm = max(dot(N, -L), 0.0);
-	vec3 diffuse = directionalLight.diffuse * material.diffuse * lambertTerm * diffuseTexture;
+	if(material.useNormalMap)
+	{
+		N = (normalTexture * 2.0 - 1.0);
+	}
+	else
+	{
+		N = TBN[2];
+	}
 
-	// specular lighting
+	// direction from fragment position to camera position
 	vec3 V = normalize(cameraPosition - vPosition.xyz);
-	vec3 R = reflect(L, N);
-	float specularTerm = pow(max(dot(R, V), 0.0), material.specularPower);
-	vec3 specular = directionalLight.specular * material.specular * specularTerm * specularTexture;
 
-	// second lighting (point light)
-	L = normalize(pointLight.position - vPosition.xyz);
-	lambertTerm = max(dot(N, -L), 0.0);
-	diffuse += pointLight.diffuse * material.diffuse * lambertTerm * diffuseTexture;
-	diffuse /= 2.0;
+	vec3 diffuse = vec3(0, 0, 0);
+	vec3 specular = vec3(0, 0, 0);
 
-	R = reflect(L, N);
-	specularTerm = pow(max(dot(R, V), 0.0), material.specularPower);
-	specular += pointLight.specular * material.specular * specularTerm * specularTexture;
-	specular /= 2.0;
+	// point lights
+	for(int i = 0; i < pointLightCount; i++)
+	{
+		// diffuse lighting
+		// direction from fragment position to light position
+		vec3 L = normalize(pointLights[i].position - vPosition.xyz);
+		float lambertTerm = max(dot(N, L), 0.0);
+		diffuse += pointLights[i].diffuse * material.diffuse * lambertTerm * diffuseTexture;
 
-	FragColor = vec4(ambient + diffuse + specular, 1.0);
-	FragColor += vec4(displacementTexture * vec3(0.011765, 0.701961, 0.384314), 0.0);
+		// specular lighting
+		vec3 R = reflect(-L, N);
+		float specularTerm = pow(max(dot(R, V), 0.0), material.specularPower);
+		specular += pointLights[i].specular * material.specular * specularTerm * specularTexture;
+	}
+
+	// directional lights
+	for(int i = 0; i < directionalLightCount; i++)
+	{
+		// diffuse lighting
+		vec3 L = normalize(-directionalLights[i].direction);
+		float lambertTerm = max(dot(N, L), 0.0);
+		diffuse += directionalLights[i].diffuse * material.diffuse * lambertTerm * diffuseTexture;
+
+		// specular lighting
+		vec3 R = reflect(-L, N);
+		float specularTerm = pow(max(dot(R, V), 0.0), material.specularPower);
+		specular += directionalLights[i].specular * material.specular * specularTerm * specularTexture;
+	}
+
+	FragColor = vec4(ambient + diffuse + specular + (emissiveTexture * vec3(1, 0, 0)), 1.0);
+
+	// gamma correction (if needed)
+	if(correctGamma)
+	{
+		FragColor = gammaCorrection(FragColor);
+	}
+}
+
+// applys gamma correction
+vec4 gammaCorrection(vec4 color)
+{
+	return vec4(pow(color.xyz, vec3(1.0 / 2.2)), color.w);
 }

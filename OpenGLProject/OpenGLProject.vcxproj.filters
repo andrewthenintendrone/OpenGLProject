@@ -13,7 +13,7 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\structs">
+    <Filter Include="Source Files\types">
       <UniqueIdentifier>{c8393b14-c739-4df2-886d-698e34e292fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -27,9 +27,6 @@
     <ClCompile Include="source\PerlinNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Terrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\OpenGLApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,9 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Texture.cpp">
@@ -66,6 +60,9 @@
     <ClCompile Include="source\RenderTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Color.cpp">
+      <Filter>Source Files\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Shader.h">
@@ -78,9 +75,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PerlinNoise.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Terrain.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\OpenGLApplication.h">
@@ -111,19 +105,19 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Light.h">
-      <Filter>Source Files\structs</Filter>
+      <Filter>Source Files\types</Filter>
     </ClInclude>
     <ClInclude Include="source\Vertex.h">
-      <Filter>Source Files\structs</Filter>
+      <Filter>Source Files\types</Filter>
     </ClInclude>
     <ClInclude Include="source\Material.h">
-      <Filter>Source Files\structs</Filter>
+      <Filter>Source Files\types</Filter>
     </ClInclude>
     <ClInclude Include="source\MeshChunk.h">
-      <Filter>Source Files\structs</Filter>
+      <Filter>Source Files\types</Filter>
     </ClInclude>
     <ClInclude Include="source\Color.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

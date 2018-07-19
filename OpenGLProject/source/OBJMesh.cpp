@@ -5,6 +5,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
+
 OBJMesh::~OBJMesh()
 {
 	for (auto& c : m_meshChunks)
@@ -82,7 +83,7 @@ bool OBJMesh::load(const std::string& filename)
 		}
 		if (!m_materials[index].specularTexture.load((folder + m.specular_texname).c_str()))
 		{
-			unsigned char pixels[4]{ 255, 255, 255, 255 };
+			unsigned char pixels[4]{ 0, 0, 0, 255 };
 
 			m_materials[index].specularTexture.create(1, 1, GL_RGBA, pixels);
 		}
@@ -97,6 +98,12 @@ bool OBJMesh::load(const std::string& filename)
 			unsigned char pixels[4]{ 0, 0, 0, 255 };
 
 			m_materials[index].displacementTexture.create(1, 1, GL_RGBA, pixels);
+		}
+		if (!m_materials[index].emissiveTexture.load((folder + m.emissive_texname).c_str()))
+		{
+			unsigned char pixels[4]{ 0, 0, 0, 255 };
+
+			m_materials[index].emissiveTexture.create(1, 1, GL_RGBA, pixels);
 		}
 
 		index++;
@@ -196,6 +203,15 @@ bool OBJMesh::load(const std::string& filename)
 
 	// load obj
 	return true;
+}
+
+// toggle whether to use normal maps
+void OBJMesh::toggleNormalMaps()
+{
+	for (auto iter = m_materials.begin(); iter != m_materials.end(); iter++)
+	{
+		iter->useNormalMap = !iter->useNormalMap;
+	}
 }
 
 // draw mesh

@@ -69,28 +69,32 @@ OpenGLApplication::OpenGLApplication(unsigned int width, unsigned int height, co
 	setup();
 }
 
+OpenGLApplication::~OpenGLApplication()
+{
+	// clean up mesh vector
+	for (OBJMesh* currentMesh : m_meshes)
+	{
+		delete currentMesh;
+	}
+}
+
 // load and create all the various assets needed
 void OpenGLApplication::setup()
 {
 	// load and compile shaders
 	m_phongShader = Shader((fs::current_path().string() + "\\resources\\shaders\\phong.vs").c_str(),
 		(fs::current_path().string() + "\\resources\\shaders\\phong.fs").c_str());
+	m_pbrShader = Shader((fs::current_path().string() + "\\resources\\shaders\\pbr.vs").c_str(),
+		(fs::current_path().string() + "\\resources\\shaders\\pbr.fs").c_str());
 	m_skyboxShader = Shader((fs::current_path().string() + "\\resources\\shaders\\skybox.vs").c_str(),
 		(fs::current_path().string() + "\\resources\\shaders\\skybox.fs").c_str());
 
-	// generate procedural mesh
-	m_proceduralMesh.initialiseIcosahedron();
-	m_proceduralMesh.material().ambient = Color::White().asVec3();
-	m_proceduralMesh.material().diffuse = Color::White().asVec3();
-	m_proceduralMesh.material().specular = Color::White().asVec3();
-	m_proceduralMesh.material().roughness = 0.5f;
-	m_proceduralMesh.material().reflectionCoefficient = 0.5f;
+	m_shaderToUse = &m_phongShader;
 
-	// apply textures to the procedural mesh
-	m_proceduralMesh.material().diffuseTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth.png").c_str());
-	m_proceduralMesh.material().ambientTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_night.png").c_str());
-	m_proceduralMesh.material().specularTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_spec.png").c_str());
-	m_proceduralMesh.material().normalTexture.load((fs::current_path().string() + "\\resources\\textures\\earth\\earth_normal.png").c_str());
+	for (OBJMesh* currentMesh : m_meshes)
+	{
+		currentMesh->toggleNormalMaps();
+	}
 
 	// procedually create skybox mesh
 	m_skybox.initialiseBox();
@@ -105,15 +109,15 @@ void OpenGLApplication::setup()
 	skyboxTextures.push_back(fs::current_path().string() + "\\resources\\textures\\sky2\\back.png");
 	m_cubemap.load(skyboxTextures);
 
-	m_jakMesh.load("C:\\Users\\s170837\\Desktop\\Jak\\Jak.obj");
-	m_daxterMesh.load("C:\\Users\\s170837\\Desktop\\Daxter\\Daxter.obj");
+	// set up light(s)
+	DirectionalLight dLight;
 
-	// set up lights
-	m_pointLight.ambient = Color::White().asVec3();
-	m_pointLight.diffuse = Color::White().asVec3();
-	m_pointLight.specular = Color::White().asVec3();
+	dLight.ambient = glm::vec3(1.0f);
+	dLight.diffuse = glm::vec3(1.0f);
+	dLight.specular = glm::vec3(1.0f);
+	dLight.direction = glm::normalize(glm::vec3(1.0f, -1.0f, -1.0f));
 
-	m_directionalLight.direction = glm::normalize(glm::vec3(1, -1, -1));
+	m_directionalLights.push_back(dLight);
 
 	// set camera position
 	m_camera.setPosition(glm::vec3(0, 15, 25));
@@ -148,32 +152,41 @@ void OpenGLApplication::render()
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// bind phong shader
-	m_phongShader.bind();
+	// bind shader
+	m_shaderToUse->bind();
 
 	// store time as a float
 	float time = (float)glfwGetTime();
 
-	m_directionalLight.bind(m_phongShader);
-	m_pointLight.bind(m_phongShader);
+	m_shaderToUse->setInt("pointLightCount", (int)m_pointLights.size());
+	m_shaderToUse->setInt("directionalLightCount", (int)m_directionalLights.size());
 
-	m_phongShader.setVec3("cameraPosition", m_camera.getPosition());
+	for (size_t i = 0; i < m_pointLights.size(); i++)
+	{
+		m_pointLights[i].bind(*m_shaderToUse, (int)i);
+	}
+	for (size_t i = 0; i < m_directionalLights.size(); i++)
+	{
+		m_directionalLights[i].bind(*m_shaderToUse, (int)i);
+	}
 
+	m_shaderToUse->setVec3("cameraPosition", m_camera.getPosition());
+
+	m_shaderToUse->setBool("correctGamma", correctGamma);
+
+	// draw meshes
 	glm::mat4 model(1);
-	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
-	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
-	m_jakMesh.draw(m_phongShader);
+	model = glm::scale(model, glm::vec3(0.01f));
 
-	model = glm::mat4(1);
-	model = glm::rotate(model, glm::radians(std::floorf(time)), glm::vec3(-1, 0, 0));
-	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
-	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
-	m_daxterMesh.draw(m_phongShader);
+	for (OBJMesh* currentMesh : m_meshes)
+	{
+		m_shaderToUse->setMat4("ModelMatrix", model);
+		m_shaderToUse->setMat3("NormalMatrix", glm::inverseTranspose(model));
+		m_shaderToUse->setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
+		currentMesh->draw(*m_shaderToUse);
 
-	model = glm::mat4(1);
-	m_phongShader.setMat3("NormalMatrix", glm::inverseTranspose(model));
-	m_phongShader.setMat4("ProjectionViewModel", m_camera.getProjectionViewMatrix() * model);
-	m_proceduralMesh.draw(m_phongShader);
+		model = glm::translate(model, glm::vec3(750, 0, 0));
+	}
 
 	// draw skybox
 
@@ -218,6 +231,34 @@ void OpenGLApplication::processInput()
 	 m_camera.m_running = true;
 	 else
 	 m_camera.m_running = false;
+
+	// N toggles normal maps
+	if (Input::getInstance().getPressed(GLFW_KEY_N))
+	{
+		for (OBJMesh* currentMesh : m_meshes)
+		{
+			currentMesh->toggleNormalMaps();
+		}
+	}
+
+	// M toggles shaders
+	if (Input::getInstance().getPressed(GLFW_KEY_M))
+	{
+		if (m_shaderToUse == &m_phongShader)
+		{
+			m_shaderToUse = &m_pbrShader;
+		}
+		else
+		{
+			m_shaderToUse = &m_phongShader;
+		}
+	}
+
+	// G toggles gamma correction
+	if (Input::getInstance().getPressed(GLFW_KEY_G))
+	{
+		correctGamma = !correctGamma;
+	}
 
 	// move camera with WASD / arrow keys
 	if (Input::getInstance().getHeld(GLFW_KEY_W) || Input::getInstance().getHeld(GLFW_KEY_UP))

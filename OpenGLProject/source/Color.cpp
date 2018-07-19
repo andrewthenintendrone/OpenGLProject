@@ -61,6 +61,16 @@ void Color::operator -= (const Color& other)
 	value -= other.value;
 }
 
+const Color Color::lerp(const Color& color1, const Color& color2, const float factor)
+{
+	uint8_t newr = uint8_t(color1.r * (1.0f - factor) + color2.r * factor);
+	uint8_t newg = uint8_t(color1.g * (1.0f - factor) + color2.g * factor);
+	uint8_t newb = uint8_t(color1.b * (1.0f - factor) + color2.b * factor);
+	uint8_t newa = uint8_t(color1.a * (1.0f - factor) + color2.a * factor);
+
+	return Color(newr, newg, newb, newa);
+}
+
 #pragma region ColorConstants
 
 Color Color::AliceBlue()

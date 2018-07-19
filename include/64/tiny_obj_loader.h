@@ -69,6 +69,7 @@ typedef struct {
   std::string bump_texname;               // map_bump, bump
   std::string displacement_texname;       // disp
   std::string alpha_texname;              // map_d
+  std::string emissive_texname;			  // map_Ke
   std::map<std::string, std::string> unknown_parameter;
 } material_t;
 
@@ -499,6 +500,7 @@ static void InitMaterial(material_t &material) {
   material.bump_texname = "";
   material.displacement_texname = "";
   material.alpha_texname = "";
+  material.emissive_texname = "";
   for (int i = 0; i < 3; i++) {
     material.ambient[i] = 0.f;
     material.diffuse[i] = 0.f;
@@ -778,6 +780,13 @@ void LoadMtl(std::map<std::string, int> &material_map,
       material.alpha_texname = token;
       continue;
     }
+
+	// emissive texture
+	if ((0 == strncmp(token, "map_Ke", 6)) && isSpace(token[6])) {
+		token += 7;
+		material.emissive_texname = token;
+		continue;
+	}
 
     // bump texture
     if ((0 == strncmp(token, "bump", 4)) && isSpace(token[4])) {

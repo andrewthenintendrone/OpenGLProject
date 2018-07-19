@@ -11,7 +11,6 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
-#include "Terrain.h"
 #include "Cubemap.h"
 #include "RenderTarget.h"
 #include "Color.h"
@@ -22,6 +21,8 @@ class OpenGLApplication
 public:
 
 	OpenGLApplication(unsigned int width = 1280, unsigned int height = 720, const char* windowTitle = "Open GL");
+	~OpenGLApplication();
+
 	void run();
 
 	// mouse info
@@ -46,10 +47,12 @@ private:
 
 	// Shader(s)
 	Shader m_phongShader;
+	Shader m_pbrShader;
+	Shader* m_shaderToUse = nullptr;
 
 	// Light(s)
-	DirectionalLight m_directionalLight;
-	PointLight m_pointLight;
+	std::vector<DirectionalLight> m_directionalLights;
+	std::vector<PointLight> m_pointLights;
 
 	// skybox
 	Mesh m_skybox; // skybox mesh
@@ -57,7 +60,7 @@ private:
 	Cubemap m_cubemap; // skybox cubemap texture
 
 	// Mesh(es)
-	Mesh m_proceduralMesh; // procedurally generated mesh
-	OBJMesh m_jakMesh;
-	OBJMesh m_daxterMesh;
+	std::vector<OBJMesh*> m_meshes;
+
+	bool correctGamma = false;
 };

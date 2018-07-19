@@ -5,7 +5,7 @@
 // generic Light struct
 struct Light
 {
-	virtual void bind(Shader shader) = 0;
+	virtual void bind(Shader shader, int index) = 0;
 
 	glm::vec3 ambient = glm::vec3(1);
 	glm::vec3 diffuse = glm::vec3(1);
@@ -15,12 +15,12 @@ struct Light
 // directional light
 struct DirectionalLight : public Light
 {
-	virtual void bind(Shader shader)
+	virtual void bind(Shader shader, int index)
 	{
-		shader.setVec3("directionalLight.ambient", ambient);
-		shader.setVec3("directionalLight.diffuse", diffuse);
-		shader.setVec3("directionalLight.specular", specular);
-		shader.setVec3("directionalLight.direction", direction);
+		shader.setVec3(std::string("directionalLights[" + std::to_string(index) + "].ambient").c_str(), ambient);
+		shader.setVec3(std::string("directionalLights[" + std::to_string(index) + "].diffuse").c_str(), diffuse);
+		shader.setVec3(std::string("directionalLights[" + std::to_string(index) + "].specular").c_str(), specular);
+		shader.setVec3(std::string("directionalLights[" + std::to_string(index) + "].direction").c_str(), direction);
 	}
 
 	glm::vec3 direction = glm::vec3(0, -1, 0);
@@ -29,13 +29,13 @@ struct DirectionalLight : public Light
 // point light
 struct PointLight : public Light
 {
-	virtual void bind(Shader shader)
+	virtual void bind(Shader shader, int index)
 	{
-		shader.setVec3("pointLight.ambient", ambient);
-		shader.setVec3("pointLight.diffuse", diffuse);
-		shader.setVec3("pointLight.specular", specular);
-		shader.setVec3("pointLight.position", position);
-		shader.setFloat("pointLight.falloffDistance", falloffDistance);
+		shader.setVec3(std::string("pointLights[" + std::to_string(index) + "].ambient").c_str(), ambient);
+		shader.setVec3(std::string("pointLights[" + std::to_string(index) + "].diffuse").c_str(), diffuse);
+		shader.setVec3(std::string("pointLights[" + std::to_string(index) + "].specular").c_str(), specular);
+		shader.setVec3(std::string("pointLights[" + std::to_string(index) + "].position").c_str(), position);
+		shader.setFloat(std::string("pointLights[" + std::to_string(index) + "].falloffDistance").c_str(), falloffDistance);
 	}
 
 	glm::vec3 position = glm::vec3(0);
@@ -45,15 +45,15 @@ struct PointLight : public Light
 // spot light
 struct SpotLight : public Light
 {
-	virtual void bind(Shader shader)
+	virtual void bind(Shader shader, int index)
 	{
-		shader.setVec3("pointLight.ambient", ambient);
-		shader.setVec3("pointLight.diffuse", diffuse);
-		shader.setVec3("pointLight.specular", specular);
-		shader.setVec3("pointLight.position", position);
-		shader.setFloat("pointLight.falloffDistance", falloffDistance);
-		shader.setFloat("pointLight.theta", theta);
-		shader.setFloat("pointLight.phi", phi);
+		shader.setVec3(std::string("spotLights[" + std::to_string(index) + "].ambient").c_str(), ambient);
+		shader.setVec3(std::string("spotLights[" + std::to_string(index) + "].diffuse").c_str(), diffuse);
+		shader.setVec3(std::string("spotLights[" + std::to_string(index) + "].specular").c_str(), specular);
+		shader.setVec3(std::string("spotLights[" + std::to_string(index) + "].position").c_str(), position);
+		shader.setFloat(std::string("spotLights[" + std::to_string(index) + "].falloffDistance").c_str(), falloffDistance);
+		shader.setFloat(std::string("spotLights[" + std::to_string(index) + "].theta").c_str(), theta);
+		shader.setFloat(std::string("spotLights[" + std::to_string(index) + "].phi").c_str(), phi);
 	}
 
 	glm::vec3 position = glm::vec3(0);

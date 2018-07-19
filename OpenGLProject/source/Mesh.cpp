@@ -127,8 +127,8 @@ void Mesh::initialiseBox()
 				v.position = glm::vec4(x, y, z, 1.0f);
 				v.normal = glm::vec4(glm::normalize(glm::vec3(v.position)), 0.0f);
 				
-				float tx = x == -0.5 ? 0 : 1;
-				float ty = z == 0.5 ? 0 : 1;
+				float tx = x == -0.5 ? 0.0f : 1.0f;
+				float ty = z == 0.5 ? 0.0f : 1.0f;
 
 				v.texcoord = glm::vec2(tx, ty);
 
@@ -370,7 +370,7 @@ void Mesh::initialiseIcosahedron()
 
 	std::vector<Vertex> verts;
 
-	for (int i = 0; i < positions.size(); i++)
+	for (size_t i = 0; i < positions.size(); i++)
 	{
 		Vertex v;
 		v.position = positions[i];
